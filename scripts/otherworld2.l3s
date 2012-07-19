@@ -1,0 +1,27 @@
+Larry = Larry
+Xahn = Xahn
+Larry.LockInput 1
+
+Music.FadeTo 0
+
+Xahn.xFlip 0
+Larry.xFlip 0
+
+Music.PlayXahnTheme
+Xahn.say "Larry!"
+Larry.say "What the?"
+Xahn.say "I'm up here, Larry"
+Larry.yShift = < Larry.y - 200 >
+Xahn.say "I see you have survived so far"
+Xahn.say "Let's see how you handle this..."
+Xahn.say "Jelly Blobs!"
+Xahn.say "Attack!"
+Xahn.xmove 200
+Xahn.visible 0
+Music.StopXahnTheme
+
+Music.FadeTo 255
+
+Larry.LockInput 0
+
+Script.end

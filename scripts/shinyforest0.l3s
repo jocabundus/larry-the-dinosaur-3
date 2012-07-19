@@ -1,0 +1,17 @@
+Larry = Larry
+
+Music.FadeTo 0
+Music.Stop
+Larry.LockInput 1
+Larry.FadeOutOfWhite
+Larry.say "Mark?!"
+Larry.say "Fletcher?!"
+Larry.say "Rusty?!"
+Larry.say "Are you guys out there?!!!"
+Larry.say "...."
+Larry.say "I sure hope they survived that explosion"
+Music.WaitAndFadeTo 255
+Music.Play
+Larry.LockInput 0
+
+Script.end

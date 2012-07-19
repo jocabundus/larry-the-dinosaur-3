@@ -1,0 +1,41 @@
+Larry = Larry
+Mark  = Mark
+Larry.LockInput 1
+
+Larry.xFlip 0
+Music.FadeTo 0
+
+Larry.say "Mark!"
+Larry.say "You're alive!"
+Mark.say "..."
+Larry.say "Mark?"
+Mark.say "Huh?"
+Mark.xFlip 1
+Mark.say "Oh..."
+Mark.say "...hello"
+Larry.say "Glad to see your doing well"
+Mark.say "..."
+Larry.say "A little speechless eh?"
+Larry.say "You must be happy to see me too"
+Mark.say "Uh..."
+Mark.say "...yes..."
+Mark.say "I am happy to see..."
+Mark.say "...you"
+Larry.say "We need to find the others and get out of this forest"
+Larry.say "Let's go mark"
+Larry.xmove 130
+Larry.xFlip 1
+Larry.say "Mark?"
+Larry.say "Are you okay?"
+Mark.say "I must go..."
+Mark.xmove -200
+Mark.x = < 5940 >
+Mark.y = < 940 >
+Larry.say "What the..."
+
+Music.WaitAndFadeTo 255
+
+Larry.LockInput 0
+Music.FadeTo 255
+
+Script.end

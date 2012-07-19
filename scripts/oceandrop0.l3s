@@ -1,0 +1,58 @@
+Larry = Larry
+Larry.LockInput 1
+Fletcher = Fletcher
+Mark  = Mark
+Rusty = Rusty
+
+Larry.xFlip 0
+Larry.say "So this is the bio-lab?"
+Larry.say "There's not much 'bio' to it"
+Rusty.say "Agreed"
+Larry.say "It's just the water treatment center"
+Mark.xFlip 1
+Mark.say "I've done an analasys on the water here"
+Mark.say "It has some very deadly chemicals in it..."
+Mark.say "so don't go for a swim"
+Rusty.say "You couldn't go for a swim anyways"
+Mark.say "Why's that?"
+Larry.xFlip 1
+Rusty.say "Your too fat..."
+Rusty.say "...plus..."
+Rusty.say "...you'd sink in those ugly boots"
+Larry.xFlip 0
+Mark.say "Are you looking for trouble?"
+Larry.xFlip 1
+Rusty.say "Looks like I found some"
+Larry.xFlip 0
+Mark.say "So blasting away aliens isn't enough for you?"
+Mark.say "Huh, punk"
+Larry.say "That's enough!"
+Larry.xFlip 1
+Larry.say "Both of you"
+Larry.say "Rusty!"
+Larry.say "Keep your opinions to yourself"
+Fletcher.say "I think I'll get a head start before all hell breaks loose"
+Fletcher.xmove 200
+Mark.say "Do you think I'm fat sir?"
+Larry.xFlip 0
+Larry.say "Mark, do you have self-esteem problems?"
+Mark.say "No sir!"
+Rusty.xmove 60
+Rusty.xFlip 1
+Larry.xFlip 0
+Larry.say "Okay..."
+Larry.say "We need to split up and find out what's going on in this lab"
+Larry.say "Watch out for any enemies"
+Rusty.say "Yes Sir!"
+Mark.say  "Yes Sir!"
+Rusty.xFlip 0
+Mark.xFlip  0
+Mark.xMove  150
+Rusty.xMove 150
+Fletcher.visible 0
+Mark.visible 0
+Rusty.visible 0
+
+Larry.LockInput 0
+Music.Play
+Script.end

@@ -1,0 +1,99 @@
+Larry = Larry
+Mark = Mark
+Fletcher = Fletcher
+Rusty = Rusty
+Xahn = Xahn
+
+
+Mark.xFlip 0
+Fletcher.xFlip 0
+Rusty.xFlip 1
+Larry.xFlip 0
+Xahn.xFlip 1
+
+Larry.LockInput 1
+
+Larry.yShift = < Larry.y - 60 >
+
+Music.PlayXahnTheme
+
+Xahn.say "Let's see here..."
+Xahn.say "All the wires are hooked up"
+Xahn.say "The backup battery is installed"
+Xahn.say "Time to see if it works"
+Xahn.FadeToWhite
+Xahn.xFlip 0
+Xahn.FadeOutOfWhite
+Xahn.say "Yes!"
+Xahn.say "The portal is finally working"
+Xahn.say "My home awaits me"
+Xahn.xShift = < Xahn.x - 40 >
+Xahn.xmove 50
+Rusty.xmove -120
+Rusty.say "Your not going anywhere, Xahn"
+Xahn.say "Oh Yes I am"
+Xahn.FadeToWhite
+Rusty.IsHurt
+Xahn.FadeOutOfWhite
+Xahn.say "Ha! ha! ha!"
+Rusty.say "What did you do to me?"
+Xahn.say "You are temporarily paralized from the waist down"
+Xahn.say "Long enough just for you to freeze out here"
+Xahn.say "Ha! ha! ha!"
+Xahn.xmove 100
+Xahn.say "Time to leave this horrible world"
+Xahn.FadeToWhite
+Xahn.visible 0
+Music.StopXahnTheme
+Xahn.FadeOutOfWhite
+Rusty.say "I need..."
+Rusty.say "...shelter"
+Rusty.xmove -140
+Mark.setspeed 2
+Fletcher.setspeed 2
+Larry.xmove 100
+Mark.setspeed 0
+Fletcher.setspeed 0
+Larry.xFlip 1
+Mark.xFlip 1
+Fletcher.xFlip 1
+Larry.say "Rusty!"
+Fletcher.setspeed -1
+Larry.xmove -60
+Fletcher.setspeed 0
+Rusty.say "Huh?"
+Rusty.xFlip 0
+Rusty.say "Larry!"
+Rusty.xmove 20
+Rusty.say "I'm...okay..."
+Rusty.say "It's just a flesh wound"
+Rusty.say "Go on..."
+Rusty.say "Go on without me"
+Larry.say "Shut up Rusty"
+Larry.say "We are not leaving you"
+Mark.say "We aren't?"
+Larry.xFlip 0
+Larry.say "No, we aren't"
+Larry.say "You too will have to get Rusty to the nearest hospital"
+Larry.say "I think there's a town about 10 miles north"
+Fletcher.say "What about you"
+Larry.say "I'm going after Xahn"
+Fletcher.say "Are you crazy?"
+Fletcher.say "You can't chase after Xahn in his world alone"
+Fletcher.say "You need some backup"
+Larry.say "No!"
+Larry.say "Don't worry about me"
+Larry.say "You need to worry about Rusty"
+Fletcher.say "I guess your right"
+Larry.xmove 120
+Larry.xFlip 1
+Mark.xFlip 0
+Fletcher.xFlip 0
+Larry.say "Contact the general when you get there"
+Larry.say "Let him know everything about what's going on"
+Fletcher.say "Good luck, Larry"
+Fletcher.say "You'll need it"
+Larry.FadeToWhite
+Larry.NextLevel
+Larry.LockInput 0
+Script.end

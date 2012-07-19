@@ -1,0 +1,39 @@
+Larry = Larry
+Fletcher = Fletcher
+Mark  = Mark
+Rusty = Rusty
+Larry.LockInput 1
+
+Larry.xFlip 1
+
+Rusty.xFlip 1
+Mark.xFlip 0
+Fletcher.xFlip 1
+
+Larry.xShift = < 0 >
+
+Rusty.say "mmmm-a-moooo-maaaa"
+Fletcher.say "What's he saying?"
+Mark.say "I think he's saying he's still mad at us..."
+Mark.say "...for 'accidentally' dropping him down the slope"
+Fletcher.say "Hehe"
+Larry.xmove -150
+Fletcher.xFlip 0
+Rusty.xFlip 0
+Fletcher.say "Larry!"
+Fletcher.say "You made it!"
+Mark.say "Congrats Larry"
+Larry.say "Why thank you"
+Rusty.say "ckaaa-chiiii-maaaaa"
+Larry.say "What's up with rusty?"
+Fletcher.say "He took a hard fall"
+Fletcher.say "but no need to worry"
+Fletcher.say "The doctor said he would be fine"
+Larry.say "cool!"
+
+Music.Play
+Larry.WaitAndyShift = < 0 >
+Larry.FadeToBlack
+Larry.ShowCredits
+
+Script.end

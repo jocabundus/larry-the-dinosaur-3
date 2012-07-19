@@ -1,0 +1,30 @@
+Music.FadeTo 0
+Larry = Larry
+Mark  = Mark
+Larry.LockInput 1
+Larry.xFlip 0
+Larry.say "How's it going Mark?"
+Mark.xFlip 1
+Mark.say  "Good"
+Larry.say "Did you find anything new?"
+Mark.say  "I have"
+Mark.say  "These 'new aliens' technically aren't new aliens"
+Larry.say "What?!"
+Mark.say  "I've done DNA test on them"
+Mark.say  "They are all hybrids"
+Larry.say "Interesting"
+Mark.say  "For example..."
+Mark.say  "That little rock dude that shoots fire..."
+Mark.say  "is a mix between a normal rockmonster and a fire fly"
+Mark.say  "Someone, or something has been splicing these creatures' DNA..."
+Mark.say  "to create more deadlier aliens"
+Larry.say "Hmmm..."
+Larry.say "Keep up the good work, Mark"
+Mark.say  "Yes sir"
+Mark.xMove -270
+Mark.visible 0
+
+Larry.LockInput 0
+Music.FadeTo 255
+
+Script.end

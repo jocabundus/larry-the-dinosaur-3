@@ -1,0 +1,18 @@
+palette:  "grada.pal"
+tileset:  "ld3tilez.put"
+objset:   "ld3objsz.put"
+objname:  "jelly fish"
+music:    "other.it"
+bosssong: "laststand.it"
+backgrnd: "otherworld.bmp"
+message:  "The Other World"
+
+ShiftPalette 1
+
+SetSkyScroll 0   57   4
+SetSkyScroll 58  180  2
+SetSkyScroll 181 255  1
+
+SkyScrollVertical 0
+
+END

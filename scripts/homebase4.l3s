@@ -1,0 +1,52 @@
+Larry = Larry
+Fletcher = Fletcher
+Rusty = Rusty
+Mark = Mark
+Larry.LockInput 1
+Larry.xFlip 0
+Music.FadeTo 0
+
+Larry.say "Hey guys"
+Fletcher.say "Hey"
+Mark.say "Hi"
+Rusty.say "Yo"
+Larry.say "What are you doing in the dark?"
+Fletcher.say "Uh"
+Fletcher.say "The elevator that leads to the hangar isn't working"
+Fletcher.say "So, we are going to take the long way"
+Larry.say "The long way?"
+Fletcher.say "Yeah"
+Fletcher.say "Through the ventalation shaft"
+Larry.say "I see"
+Rusty.say "So what are we waiting for?"
+Fletcher.xFlip 0
+Rusty.say "Let's blow this place"
+Mark.xFlip 0
+Mark.say "Curse you and your violent lingo"
+Rusty.say "Ah shut up!"
+
+Rusty.xFlip 0
+Rusty.setspeed 2
+Mark.xmove 100
+Rusty.setspeed 0
+
+Fletcher.xFlip 1
+Larry.say "What's up with those two?"
+Fletcher.say "I don't know"
+Fletcher.say "I just met them too, you know?"
+Larry.say "Oh"
+Larry.say "Okay then"
+Fletcher.say "Let's go"
+Fletcher.xFlip 0
+Fletcher.xmove 100
+Larry.say "Hey!"
+Larry.say "Wait for me!"
+
+Larry.xmove 100
+
+Larry.FadeToBlack
+Music.WaitAndFadeTo 0
+Larry.LockInput 0
+Larry.NextLevel
+
+Script.end

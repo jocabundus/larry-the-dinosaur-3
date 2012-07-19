@@ -1,0 +1,23 @@
+Larry = Larry
+Xahn = Xahn
+
+Larry.LockInput 1
+Music.FadeTo 0
+Larry.xFlip 0
+Xahn.xFlip 1
+
+Xahn.xmove -40
+Xahn.say "Well well well..."
+Xahn.say "We meet again, Larry"
+Larry.shoot
+Xahn.say "Ahhh!"
+Xahn.say "You shot me!"
+Larry.say "What was I suppose to do..."
+Larry.say "Let you stand there and talk?"
+Xahn.say "That's it!"
+Xahn.say "It's time to die, Larry!"
+
+Larry.LockInput 0
+Music.FadeTo 255
+
+Script.end

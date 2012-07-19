@@ -1,0 +1,32 @@
+Larry = Larry
+Xahn = Xahn
+
+Larry.LockInput 1
+
+Larry.x = < 9240 >
+Larry.y = < 1740 >
+Xahn.x = < 9360 >
+Xahn.y = < 1740 >
+Larry.xFlip 0
+Xahn.xFlip 1
+Music.WaitAndFadeTo 0
+Larry.FadeOutOfWhite
+Xahn.say "No!"
+Xahn.say "How could you?!"
+Xahn.say "You destroyed my exo-dragon!"
+Xahn.say "oh..."
+Xahn.say "I don't feel so good"
+Xahn.say "I think those explosions got to me"
+Xahn.say "Uh oh..."
+Xahn.say "There's a bomb next to me..."
+Xahn.say "...isn't there?"
+Larry.say "Yep"
+Xahn.explode
+
+Music.WaitAndFadeTo 255
+Music.Play
+
+Larry.say "You survive me no more"
+Larry.LockInput 0
+
+Script.end

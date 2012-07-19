@@ -1,0 +1,15 @@
+palette:  "gradd.pal"
+tileset:  "ld3tiled.put"
+objset:   "ld3objss.put"
+objname:  "crystals"
+music:    "wintersend.it"
+backgrnd: "frostbite.bmp"
+message:  "Frost Bite"
+
+ShiftPalette 1
+
+SetSkyScroll 0   255  2
+
+SkyScrollVertical 0
+
+END

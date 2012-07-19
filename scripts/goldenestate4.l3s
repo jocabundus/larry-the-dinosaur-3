@@ -1,0 +1,9 @@
+Larry = Larry
+
+Larry.LockInput 1
+Larry.FadeToBlack
+Larry.MoveToPos2
+Larry.LockInput 0
+Larry.FadeOutOfBlack
+
+Script.end

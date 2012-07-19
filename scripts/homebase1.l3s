@@ -1,0 +1,11 @@
+Larry = Larry
+Larry.LockInput 1
+Larry.xFlip 0
+
+Larry.say "Yuck!"
+Larry.say "Does no one flush around here?"
+Larry.say "Disgusting"
+
+Larry.LockInput 0
+
+Script.end

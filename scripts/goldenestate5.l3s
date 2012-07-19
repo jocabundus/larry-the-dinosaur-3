@@ -1,0 +1,60 @@
+Larry = Larry
+Mark = Mark
+Xahn = Xahn
+BadMark = BadMark
+
+Larry.LockInput 1
+Music.FadeTo 0
+Larry.xFlip 0
+Mark.xFlip 1
+Xahn.xFlip 1
+BadMark.xFlip 1
+BadMark.visible 1
+
+Mark.say "Larry!"
+Larry.say "Mark?"
+
+Music.PlayXahnTheme
+Xahn.xmove -40
+Xahn.say "Hey Larry!"
+Xahn.say "Glad that you dropped in..."
+Larry.say "Xahn!!!"
+Xahn.say "Yes, Larry"
+Xahn.say "I am still alive"
+Mark.say "Larry!"
+Mark.say "Help!"
+Larry.say "Mark!"
+Larry.say "I thought you were dead too"
+Larry.say "You blew up right infront of me"
+Mark.say "That wasn't me!"
+Xahn.say "Shut up Mark before I kill you!"
+Xahn.say "You see, Larry"
+Xahn.say "Mark has been a part of my experiment"
+Xahn.say "my cloning experiment"
+Larry.say "What?!"
+Xahn.say "The mark you saw that exploded was a clone"
+Xahn.say "He was suppose to kill you"
+Xahn.say "but he was too stupid"
+Larry.say "Yes..."
+Larry.say "He was"
+Larry.say "It kinda reflects the creator"
+Xahn.say "Shut up Larry!"
+Xahn.say "I have refined my skills and created a new clone"
+Xahn.say "However..."
+Xahn.say "this one has a special touch to it"
+
+Xahn.say "Larry..."
+Xahn.say "Let me introduce you to..."
+BadMark.xmove -100
+Xahn.say "Bad Mark"
+Xahn.say "Hahaha"
+Xahn.say "Have fun"
+Xahn.xFlip 0
+Xahn.xmove 80
+Xahn.visible 0
+
+Music.StopXahnTheme
+Larry.LockInput 0
+Music.FadeTo 255
+
+Script.end

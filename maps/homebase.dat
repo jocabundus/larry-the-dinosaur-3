@@ -1,0 +1,18 @@
+palette:  "grad0.pal"
+tileset:  "ld3tile0.put"
+tileset2: "ld3tileb.put"
+objset:   "ld3objs0.put"
+objname:  "coffee mugs"
+larryset: "lary.put"
+music:    "justice.it"
+backgrnd: "stars.bmp"
+message:  ""
+
+HasWaterGun 0
+
+SetSkyScroll 0   255  2
+
+SkyScrollVertical    1
+VerticalScrollShift  2
+
+END

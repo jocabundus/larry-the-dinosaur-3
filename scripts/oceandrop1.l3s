@@ -1,0 +1,30 @@
+Music.FadeTo 0
+Larry = Larry
+Fletcher = Fletcher
+Larry.LockInput 1
+
+Fletcher.xFlip 1
+Fletcher.say "Gee Larry..."
+Fletcher.say "Take down the whole place why don't ya"
+Larry.xFlip 0
+Larry.say "Fletcher!"
+Larry.say "What were you thinking back there?"
+Fletcher.say "You said that's enough..."
+Fletcher.say "So I fled the scene to prevent any further confrontation"
+Larry.say "Sure you did"
+Larry.say "Don't do that again"
+Fletcher.say "I haven't found anything in this place"
+Fletcher.say "It seems to be deserted, accept for the monsters"
+Larry.say "Same here"
+Larry.say "They probably evacuated since they knew we were coming"
+Larry.say "We should get out of this place"
+Larry.say "I don't like it"
+Larry.say "For all we know, they could of set a timed bomb"
+Fletcher.say "Yeah, good idea"
+Larry.say "I'll inform Mark to evacuate"
+Larry.say "Who knows what you would do"
+
+Larry.LockInput 0
+Music.FadeTo 255
+
+Script.end

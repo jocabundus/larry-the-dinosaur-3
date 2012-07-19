@@ -1,0 +1,89 @@
+Larry = Larry
+Fletcher = Fletcher
+Rusty = Rusty
+Mark = Mark
+General = General
+Larry.LockInput 1
+Larry.xFlip 0
+General.xFlip 0
+Music.FadeTo 0
+
+
+General.say "I've been waiting for you Larry"
+General.xFlip 1
+Larry.say "Yes sir"
+General.say "Larry!"
+General.say "What are you doing with that sledgehammer?!"
+Larry.say "I am taking care of the rodents, sir"
+General.say "What am I going to do with you, Larry"
+Larry.say "You could hire an exterminator..."
+Larry.say "...and he can kill the rodents"
+General.say "Hmm"
+General.say "You make an interesting point, Larry"
+General.say "Now shut up and listen!"
+General.say "There's been some interesting things going on in spike valley"
+General.say "And since you've been there before, you know the place well"
+General.say "I'm going to assign you a team to go over there and study what's been happening"
+Larry.say "What has been happening, sir?"
+General.say "The usual dangers, rockmonsters, blobs, and so forth..."
+General.say "have been mutating lately..."
+General.say "and no one knows why"
+Larry.say "I see"
+General.say "Now, let's meet your team"
+
+General.xFlip 0
+General.setspeed 2
+Larry.xmove 500
+General.setspeed 0
+Larry.xmove 100
+
+Fletcher.xFlip 1
+Rusty.xFlip 1
+Mark.xFlip 1
+
+General.say "Larry"
+General.say "Here is your team"
+General.say "Fletcher, you're pilot"
+Fletcher.say "Hey"
+General.say "Mark is a computer scientist"
+Mark.say "Good to meet you, Larry"
+General.say "He'll be doing most of the research and studying"
+General.say "And finally..."
+General.say "Rusty"
+Rusty.say "Sup dude"
+General.say "He's the extra"
+Rusty.say "what?!"
+General.say "Just kidding"
+General.say "He's trained in demolition"
+General.say "So if you get in any tough spots, he'll help you out"
+General.say "You guys have your orders"
+General.say "so move out"
+General.xFlip 1
+General.xmove -400
+General.visible 0
+
+Larry.say "so..."
+Fletcher.say "Yeah, so..."
+Fletcher.say "Nice sledgehammer you got there"
+Larry.say "Why thank you"
+Fletcher.say "Anyway..."
+Fletcher.say "We will meet you in the hangar"
+Fletcher.setspeed -2
+Mark.setspeed -2
+Rusty.xmove -400
+
+Fletcher.setspeed 0
+Mark.setspeed 0
+Fletcher.x = < 3714 >
+Fletcher.y = < 1180 >
+Mark.x = < 3720 >
+Mark.y = < 1180 >
+Rusty.x = < 3740 >
+Rusty.y = < 1180 >
+
+Larry.say "Suddenly, I feel left out"
+
+Music.WaitAndFadeTo 255
+Larry.LockInput 0
+
+Script.end

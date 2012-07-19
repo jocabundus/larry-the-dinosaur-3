@@ -1,0 +1,23 @@
+palette:  "grada.pal"
+tileset:  "ld3tileh.put"
+objset:   "ld3objs2.put"
+objname:  "leaves"
+bossset:  "bigboss1.put"
+music:    "fallevening2.it"
+bosssong: "boss.it"
+backgrnd: "fallevening.bmp"
+message:  "Fall Evening"
+
+ShiftPalette 1
+
+SetSkyScroll 0   15  6
+SetSkyScroll 16  40  4
+SetSkyScroll 41  64  5
+SetSkyScroll 65  145 4
+SetSkyScroll 146 165 3
+SetSkyScroll 166 185 2
+SetSkyScroll 186 255 1
+
+SkyScrollVertical 0
+
+END

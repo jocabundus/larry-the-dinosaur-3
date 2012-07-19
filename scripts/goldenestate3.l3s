@@ -1,0 +1,8 @@
+Larry = Larry
+
+Larry.LockInput 1
+Larry.say "Woah..."
+Larry.say "What's going on here?"
+Larry.LockInput 0
+
+Script.end

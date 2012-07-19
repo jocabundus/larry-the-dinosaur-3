@@ -1,0 +1,18 @@
+palette:  "grado.pal"
+tileset:  "ld3tileo.put"
+tileset2: "ld3tilep.put"
+objset:   "ld3objs3.put"
+objname:  "water drops"
+music:    "friction.it"
+backgrnd: "oceandrop.bmp"
+message:  "Treatment Center"
+
+ShiftPalette 1
+
+SetSkyScroll 0   255 2
+SetSkyScroll 100 159 3
+
+SkyScrollVertical    1
+VerticalScrollShift  2
+
+END

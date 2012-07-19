@@ -1,0 +1,9 @@
+Larry = Larry
+
+Larry.setspeed 0
+Larry.FadeToWhite
+Larry.WaitAndFadeToBlack
+
+Larry.NextLevel
+
+Script.end

@@ -1,0 +1,34 @@
+Music.FadeTo 0
+Larry = Larry
+Larry.LockInput 1
+Fletcher = Fletcher
+Fletcher.x = < Larry.x + 200 >
+Fletcher.y = < Larry.y >
+Fletcher.visible 1
+Fletcher.xFlip 1
+Fletcher.say "Larry!"
+Larry.say "Who's that?"
+Fletcher.xmove -120
+Larry.xflip 0
+Larry.say "Fletcher?"
+Fletcher.say "No, it's your mom"
+Larry.say "Very funny"
+Larry.say "So, what's the news?"
+Fletcher.say "These creatures here are nothing like I've seen before"
+Larry.say "Yeah, same here"
+Fletcher.say "I needed to tell you to watch out..."
+Fletcher.say "These creatures are smart"
+Fletcher.say "They ambushed me a while back, and I barely survived it"
+Larry.say "You look fine to me"
+Fletcher.say "Well..."
+Fletcher.say "I got better"
+Fletcher.say "Anyway, I'll stay in touch..."
+Fletcher.say "...somehow"
+Fletcher.xFlip 0
+Fletcher.xmove 150
+Fletcher.visible 0
+
+Music.FadeTo 255
+Larry.LockInput 0
+
+Script.end

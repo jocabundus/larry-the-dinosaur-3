@@ -1,0 +1,43 @@
+Larry = Larry
+Mark  = Mark
+Larry.LockInput 1
+
+Larry.xFlip 0
+Mark.xFlip 0
+Music.FadeTo 0
+
+Larry.say "Mark?"
+Mark.xFlip 1
+Mark.say "Hello"
+Larry.say "Do you know my name, Mark?"
+Mark.say "Who's Mark?"
+Larry.say "..."
+Larry.say "What the..."
+Larry.say "You've lost your memory"
+Mark.uani 75
+Mark.say "I am"
+Mark.say "I exist"
+Mark.say "He gave me life"
+Larry.say "Who gave you life?"
+Mark.say "The one..."
+Mark.say "The only..."
+Mark.say "..."
+Mark.say "I don't feel so good"
+Mark.say "Is this what pain feels like?"
+Mark.uani 75
+Mark.uani 76
+Mark.uani 77
+Mark.splatter 10
+Mark.loop 300
+Mark.explode
+Larry.say "Mark!"
+Larry.say "What happened to him?"
+Larry.xmove 300
+Larry.NextLevel
+
+Larry.LockInput 0
+Music.FadeTo 255
+Larry.WaitAndFadeToBlack
+Larry.NextLevel
+
+Script.end

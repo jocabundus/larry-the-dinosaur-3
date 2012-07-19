@@ -1,0 +1,78 @@
+Larry = Larry
+Fletcher = Fletcher
+Rusty = Rusty
+Mark = Mark
+General = General
+Larry.LockInput 1
+Larry.xFlip 0
+General.xFlip 0
+Music.FadeTo 0
+
+General.say "I've been waiting for you Larry"
+General.xFlip 1
+Larry.say "Yes sir"
+General.say "Larry!"
+General.say "What are you doing with that sledgehammer?!"
+Larry.say "I am taking care of the rodents, sir"
+General.say "What am I going to do with you, Larry"
+Larry.say "You could call the exterminator..."
+Larry.say "...and he can kill the rodents"
+General.say "Maybe later"
+General.say "I read your report on the incident two weeks ago"
+General.say "In your report you mentioned a portal"
+Larry.say "Yes sir, I beleive I did"
+General.say "We searched the entire base and didn't find anything like that"
+General.say "So..."
+General.say "Either it was stolen..."
+General.say "Or you've gone crazy"
+General.say "I'd guess the latter"
+General.say "Since you look very intimidating with that sledgehammer"
+Larry.say "..."
+General.say "Have you had any counsiling since the incident?"
+Larry.say "Well, no sir..."
+Larry.say "...I haven't..."
+Larry.say "...but I am fine, sir"
+General.say "I'm going to reassign you to do something simple"
+Larry.say "but sir!"
+General.say "Now listen..."
+General.say "There's been some interesting things going on in spike valley"
+General.say "And since you've been there before, you know the place well"
+General.say "I'm going to assign you a team to go over there and study what's been happening"
+Larry.say "What has been happening, sir?"
+General.say "The usual dangers there, rockmonsters, blobs, and so forth..."
+General.say "have been mutating lately..."
+General.say "and no one knows why"
+Larry.say "but sir.."
+Larry.say "I'm not the type that goes out and studies things"
+General.say "Don't you 'but' me"
+General.say "You have your orders"
+Larry.say "Yes sir..."
+General.say "Now, let's meet your team"
+
+General.xFlip 0
+General.setspeed 2
+Larry.xmove 100
+General.setspeed 0
+
+General.say "Larry"
+General.say "Here is your team"
+General.say "Fletcher, you're weapon's specialist"
+Fletcher.say "Hi"
+General.say "Mark is a computer scientist"
+Mark.say "Good to meet you, Larry"
+General.say "He'll be doing most of the research and studying"
+General.say "And finally..."
+General.say "Rusty"
+Rusty.say "Sup dude"
+General.say "He's the extra"
+Rusty.say "what?!"
+General.say "Just kidding"
+General.say "He's trained in demolition"
+General.say "So if you get in any tough spots, he'll help you out"
+
+Larry.FadeToBlack
+Music.WaitAndFadeTo 0
+Larry.LockInput 0
+Larry.NextLevel
+
+Script.end

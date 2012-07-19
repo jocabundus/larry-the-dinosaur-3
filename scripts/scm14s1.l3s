@@ -1,0 +1,14 @@
+Larry = Larry
+
+
+Larry.LockInput 1
+Larry.xFlip 0
+Music.WaitAndFadeTo 0
+
+Larry.say "It's time to go home"
+Larry.xmove 60
+Larry.FadeToWhite
+
+Larry.LockInput 0
+
+Script.end

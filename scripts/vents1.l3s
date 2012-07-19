@@ -1,0 +1,69 @@
+Larry = Larry
+Fletcher = Fletcher
+Rusty = Rusty
+Mark = Mark
+Larry.LockInput 1
+Larry.xFlip 0
+Music.FadeTo 0
+
+Larry.xShift = < Larry.x - 20 >
+
+Larry.say "Hey guys"
+Fletcher.xFlip 1
+Rusty.xFlip 1
+Mark.xFlip 1
+Fletcher.say "Hey"
+
+Larry.say "Did you guys see those huge spiders?"
+Fletcher.say "Spiders?"
+Fletcher.say "Did you see any spiders, Mark?"
+Mark.xFlip 0
+Mark.say "No"
+Fletcher.xFlip 0
+Fletcher.say "What about you, Rusty?"
+Rusty.say "I ate them!"
+Fletcher.xFlip 1
+Mark.say "I think he's crazy?"
+Rusty.say "You're crazy!"
+Mark.say "I'm not crazy"
+Rusty.say "You will be when I bash your brains in!"
+Larry.say "Woah!"
+Mark.xFlip 1
+Larry.say "Can't we all just get along?"
+Fletcher.say "Atleast we didn't see any huge spiders"
+Rusty.say "I told ya!"
+Rusty.say "I ate them!"
+Rusty.say "Last one to the hangar eats my digested spiders!"
+
+Mark.xFlip 0
+Fletcher.xFlip 0
+Rusty.xFlip 0
+Rusty.xmove 400
+Mark.say "Yuck!"
+Larry.say "Isn't that another way of saying eat my #@%$?"
+Fletcher.say "Maybe"
+Fletcher.say "Or Maybe you're crazy"
+Larry.say "I really did see huge spiders"
+Fletcher.say "Sure you did"
+
+Fletcher.xmove 400
+Mark.xFlip 1
+
+Mark.say "I believe you, Larry"
+Larry.say "Why thank you, Mark"
+Mark.say "But just because you saw it dosen't mean it exist"
+Mark.say "I think the term is called schizophrenia"
+Mark.say "You should seek help"
+
+Mark.xFlip 0
+Mark.xMove 400
+
+Larry.say "Oh boy"
+Mark.xMove 200
+
+Larry.FadeToBlack
+Music.WaitAndFadeTo 0
+Larry.LockInput 0
+Larry.NextLevel
+
+Script.end

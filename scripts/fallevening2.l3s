@@ -1,0 +1,33 @@
+Music.FadeTo 0
+Larry = Larry
+Larry.LockInput 1
+Fletcher = NewFletcher
+Fletcher.x = < Larry.x + 200 >
+Fletcher.y = < Larry.y >
+Fletcher.xFlip 1
+Fletcher.say "Larry!"                    
+Fletcher.xmoveto < Larry.x + 130 >
+Larry.xflip 0
+Larry.say "Fletcher?"
+Fletcher.say "No, it's your sister, Sally"
+Larry.say "All right! That's enough from you"
+Fletcher.say "I found the entrance to the bio - laboratory"
+Fletcher.say "But it's guarded"
+Larry.say "Guarded by what?"
+Fletcher.say "It's guarded by some psycho and his ball-bearing shooting machine"
+Larry.say "What?!"
+Fletcher.say "You heard me"
+Larry.say "That sounds familiar..."
+Larry.say "...yes..."
+Fletcher.say "Yes what?"
+Larry.say "An old enemy..."
+Larry.say "I'll handle him"
+Fletcher.say "Okay..."
+Fletcher.say "It's your funeral"
+Fletcher.xmove -270
+Fletcher.visible 0
+
+Music.FadeTo 255
+Larry.LockInput 0
+
+Script.end

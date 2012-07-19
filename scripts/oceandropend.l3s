@@ -1,0 +1,53 @@
+Music.FadeTo 0
+Larry = Larry
+Fletcher = Fletcher
+Mark = Mark
+Rusty = Rusty
+Larry.LockInput 1
+
+
+Fletcher.y = < Larry.y >
+Fletcher.x = < Larry.x + 200 >
+Mark.y = < Larry.y >
+Mark.x = < Larry.x + 225 >
+Rusty.y = < Larry.y >
+Rusty.x = < Larry.x + 240 >
+Fletcher.visible 1
+Mark.visible 1
+Rusty.visible 1
+
+Larry.xFlip 0
+Fletcher.xFlip 1
+Mark.xFlip 1
+Rusty.xFlip 1
+Fletcher.xmove -80
+Mark.xmove -100
+Rusty.xmove -90
+
+Fletcher.say "Larry!"
+Fletcher.say "I'm glad we found you"
+Fletcher.say "Mark discovered that this place is rigged with explosives"
+Mark.say "Yes..."
+Mark.say "And according to my calculations..."
+Mark.say "This place is set to explode..."
+Mark.say "In 5 seconds"
+Mark.say "Uh oh..."
+Mark.say "Run!!!"
+Fletcher.xFlip 0
+Mark.xFlip 0
+Rusty.xFlip 0
+Fletcher.setspeed 2
+Mark.setspeed 2
+Rusty.setspeed 2
+Larry.xmoveto < 9920 >
+
+Larry.FadeToWhite
+Music.WaitAndFadeTo 0
+Larry.FadeToBlack
+Larry.ClearBuffers
+Larry.Wait 5
+
+Larry.NextLevel
+Larry.LockInput 0
+
+Script.end

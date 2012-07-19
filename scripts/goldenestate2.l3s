@@ -1,0 +1,59 @@
+Larry = Larry
+Rusty = Rusty
+Mark  = Mark
+
+Rusty.y = < Larry.y >
+Rusty.x = < Larry.x + 200 >
+
+Larry.LockInput 1
+Music.FadeTo 0
+Rusty.xFlip 1
+Rusty.visible 1
+Rusty.xmove -40
+Larry.xFlip 0
+
+
+Larry.say "Rusty!"
+Larry.say "You're alive!"
+Rusty.say "Booh yeah!"
+Larry.say "Have you found the others?"
+Rusty.say "Just Mark"
+Rusty.say "but he got spastic and ran away..."
+Rusty.say "...away like a chicken"
+Larry.say "Odd..."
+Larry.say "I met Mark back in the forest and he pulled the same stuff"
+Rusty.say "You shouldn't be so surprised"
+Rusty.say "What did you expect from the computer geek?"
+Larry.say "Don't jump to conclusions"
+Larry.say "He didn't seem himself"
+Rusty.say "I'm tellin' ya!"
+Rusty.say "He chickened out..."
+Rusty.say "like a chicken!"
+Rusty.say "bak! bak! bak!"
+Larry.say "Okay Rusty..."
+Rusty.say "yeah?"
+Larry.say "That's enough from you"
+Larry.say "I saw Mark explode back in the forest"
+Rusty.say "What?"
+Larry.say "Yeah, he went boom"
+Larry.say "Chickens don't explode"
+Rusty.say "Ones with c4 strapped to them do"
+Larry.say "How about I just chuck a grenade at you right now"
+Mark.say  "Help!"
+Mark.say  "Help Me!"
+Larry.say "What was that?"
+Larry.say "Mark?"
+Larry.say "That can't be"
+Rusty.say "I'm gonna go scuff the little chicken"
+
+Rusty.xFlip 0
+Rusty.xmove 200
+Rusty.visible 0
+
+Larry.say "Hey!"
+Larry.say "Wait for me!"
+
+Larry.LockInput 0
+Music.FadeTo 255
+
+Script.end

@@ -1,0 +1,21 @@
+palette:  "grada.pal"
+tileset:  "ld3tilef.put"
+objset:   "ld3objsf.put"
+bossset:  "ld3boss4.put"
+objname:  "shiny flies"
+music:    "frogs.it"
+bosssong: "ld3.it"
+backgrnd: "shine.bmp"
+message:  "The Shiny Forest"
+
+ShiftPalette 1
+TreadMillDeath 1
+
+SetSkyScroll 0   255  3
+SetSkyScroll 28  47   2
+SetSkyScroll 48  140  1
+SetSkyScroll 141 166  2
+
+SkyScrollVertical 2
+
+END

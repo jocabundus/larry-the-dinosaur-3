@@ -1,0 +1,82 @@
+Larry = Larry
+Mark  = Mark
+Rusty = NewRusty
+Fletcher = NewFletcher
+
+Rusty.y = < Larry.y >
+Rusty.x = < Larry.x - 300 >
+Fletcher.y = < Larry.y >
+Fletcher.x = < Larry.x - 340 >
+
+Rusty.xFlip 0
+Fletcher.xFlip 0
+
+Larry.LockInput 1
+
+Music.FadeTo 0
+Larry.yShift = < Larry.y - 60 >
+Larry.xFlip 1
+Larry.xmoveto < Mark.x + 80 >
+Larry.say "Let's get you out of there, Mark"
+
+Rusty.xmove 200
+Fletcher.xmove 200
+
+Fletcher.say "yo!"
+Larry.xFlip 1
+Larry.say "Flecther!"
+Larry.say "You found us"
+Fletcher.say "You sure can point out the obvious"
+Larry.say "..."
+Fletcher.say "It was no problem with all the racket going on down here"
+Fletcher.say "So..."
+Fletcher.say "Who's the dead guy"
+Larry.say "That's Mark"
+Fletcher.say "What?!"
+Larry.say "Oh wait, I mean Bad Mark"
+Fletcher.say "This is no time for games, Larry"
+Larry.say "No, really"
+Larry.say "The real Mark is alive"
+Larry.say "He's up in the cage"
+Mark.say "Hi"
+Larry.say "Bad Mark is one of Mark's clones that Xahn created"
+Fletcher.say "Oh..."
+Fletcher.say "I'm guessing he was bad"
+Fletcher.say "Did Rusty named him?"
+Rusty.xFlip 1
+Rusty.say "Hey!"
+Larry.say "No, Xahn did"
+Rusty.say "Why did you accuse me of naming him?"
+Rusty.say "Do you think I'm dumb or something"
+Mark.say "Hey!"
+Mark.say "I am still loitering around in this cage"
+Rusty.say "Just a second, Mark"
+Mark.say "Maybe I should just through my laptop at you"
+Rusty.say "Why does everyone want to through things at me?"
+Larry.say "Order!"
+Larry.say "Let's get Mark out of this cage ASAP!"
+Larry.say "As we speak, Xahn is getting away"
+
+Larry.FadeToBlack
+Mark.y = < Larry.y >
+Larry.FadeOutOfBlack
+
+Larry.say "Let's go"
+Rusty.say "Booy yeah!"
+
+Larry.xFlip 0
+Mark.xFlip 0
+Rusty.xFlip 0
+Fletcher.xFlip 0
+Mark.setspeed 2
+Rusty.setspeed 2
+Fletcher.setspeed 2
+Larry.xmove 400
+
+Larry.FadeToBlack
+
+
+Larry.LockInput 0
+Larry.NextLevel
+
+Script.end

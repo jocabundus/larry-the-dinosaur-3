@@ -1,0 +1,15 @@
+palette:  "grada.pal"
+tileset:  "ld3tile6.put"
+objset:   "ld3objsg.put"
+objname:  "roses"
+music:    "crossways.it"
+backgrnd: "gstate.bmp"
+message:  "Aqueduct Crossways"
+
+ShiftPalette 1
+
+SetSkyScroll 0   255  2
+
+SkyScrollVertical 0
+
+END

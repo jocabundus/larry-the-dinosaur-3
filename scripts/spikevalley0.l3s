@@ -1,0 +1,21 @@
+Larry = Larry
+Larry.LockInput 1
+Fletcher = Fletcher
+Larry.FadeOutOfBlack
+Larry.xFlip 0
+Larry.say "It's time to kick some alien trash yet again"
+Fletcher.say "Agreed"
+Fletcher.say "I'll take this area..."
+Fletcher.say "You search ahead"
+Larry.say "Hey! Who said you were in charge?"
+Fletcher.xmove 100
+Fletcher.say "Ahhhhh!!!"
+Larry.say "Fletcher?! Are you alright?"
+Fletcher.say "Yeah, I'm fine"
+Fletcher.xFlip 0
+Fletcher.visible 0
+Music.Play
+
+Larry.LockInput 0
+
+Script.end

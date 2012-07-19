@@ -1,0 +1,50 @@
+Music.FadeTo 0
+Larry = Larry
+Larry.LockInput 1
+Xahn = NewXahn
+Music.PlayXahnTheme
+Xahn.x = < Larry.x + 200 >
+Xahn.y = < Larry.y >
+Xahn.xFlip 1
+Xahn.say "Larry!"
+Larry.say "Ya know..."
+Larry.say "I'm really getting sick of hearing my name"
+Xahn.xmoveto < Larry.x + 150 >
+Xahn.say "Hello, Larry"
+Larry.say "Did you hear me?!"
+Xahn.say "Yes I did"
+Xahn.say "Larry, Larry, Larry"
+Xahn.say "You must forgive me..."
+Xahn.say "The last time we met, I didn't introduce myself"
+Xahn.say "My name is Xahn"
+Larry.say "Well..."
+Larry.say "That's good for you"
+Larry.say "You look smaller since the last time we met"
+Xahn.say "You know what they say"
+Xahn.say "You are what you eat"
+Larry.say "And what have you been eating..."
+Larry.say "...Xahn"
+Xahn.say "Your head on a plate after I kill you!"
+Larry.say "Looks like someone woke up on the wrong side of the dirt"
+Larry.say "First of all..."
+Larry.say "How did you survive that blast?"
+Xahn.say "The same way you survived it, Larry"
+Larry.say "Anyways, your 'master' xenophobe is dead now..."
+Larry.say "So who are you taking orders from this time?"
+Xahn.say "I am taking orders from my anger!"
+Larry.say "Well, looks like the alien has feelings"
+Xahn.say "oooo!"
+Xahn.say "I hate you, Larry!"
+Larry.say "Are you going to cry now, little alien?"
+Xahn.say "That's it!"
+Xahn.say "I've improved my machine since the last time we met"
+Xahn.say "I hope you like it"
+Xahn.xFlip 0
+Xahn.xmove 80
+Xahn.x = < 0 >
+Xahn.y = < 0 >
+
+Music.StopXahnTheme
+Larry.LockInput 0
+
+Script.end

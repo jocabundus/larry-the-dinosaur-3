@@ -1,0 +1,29 @@
+Larry = Larry
+Xahn = Xahn
+Larry.LockInput 1
+
+Music.FadeTo 0
+
+Xahn.xFlip 1
+Larry.xFlip 0
+
+Music.PlayXahnTheme
+Xahn.xmove -50
+Xahn.say "Larry!"
+Xahn.say "How dare you follow me!"
+Larry.say "You left the portal open you idiot"
+Xahn.say "Damn!"
+Xahn.say "Remeber this, Larry"
+Xahn.say "You are in my world now"
+Xahn.xFlip 0
+Xahn.xmove 60
+Xahn.x = < 7120 >
+Xahn.y = < 20 >
+Music.StopXahnTheme
+
+Music.Play
+Music.FadeTo 255
+
+Larry.LockInput 0
+
+Script.end

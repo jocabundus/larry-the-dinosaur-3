@@ -1,0 +1,18 @@
+Larry = Larry
+
+Larry.LockInput 1
+
+Larry.xFlip 0
+
+Music.WaitAndFadeTo 0
+
+Larry.say "The other portal!"
+Larry.say "Looks like I'm going home"
+Larry.xmoveto 9820
+
+Larry.FadeToWhite
+Larry.NextLevel
+
+Larry.LockInput 0
+
+Script.end

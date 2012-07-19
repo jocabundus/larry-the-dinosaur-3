@@ -1,0 +1,18 @@
+Larry = Larry
+General = General
+Larry.LockInput 1
+Larry.xFlip 0
+
+
+Larry.say "Why did you do it barney?"
+Larry.say "You were foolish"
+Larry.say "Anyways..."
+Larry.say "I don't know what makes me madder"
+Larry.say "Barney betraying me..."
+Larry.say "...or..."
+Larry.say "The fact that this water gun dosen't shoot further than 50 feet"
+
+Larry.LockInput 0
+Music.Play
+
+Script.end
