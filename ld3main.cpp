@@ -584,8 +584,15 @@ void Init()
 	//--------------------------------------------
 		
 		//- Initialize the sound system
+#ifdef WITH_FMOD
+#ifdef TARGET_OS_LINUX
 			FSOUND_SetOutput(FSOUND_OUTPUT_ALSA);
+#endif
 			FSOUND_Init(44100,32,0);
+#else
+			Mix_Init(MIX_INIT_MOD | MIX_INIT_OGG | MIX_INIT_MP3);
+			Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 1024);
+#endif
 
 		//fstep   = FSOUND_Sample_Load(FSOUND_FREE, "sfx/footstep3.wav", FSOUND_NORMAL | FSOUND_LOOP_OFF,0);
 		//mfstep  = FSOUND_Sample_Load(FSOUND_FREE, "sfx/footstep2.wav", FSOUND_NORMAL | FSOUND_LOOP_OFF,0);

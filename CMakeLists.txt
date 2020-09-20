@@ -34,4 +34,9 @@ add_executable(ld3
 	winapp.cpp
 	#	winproc.cpp
 )
-target_link_libraries(ld3 SDL2 ${CMAKE_SOURCE_DIR}/fmod/libfmod-3.75.so)
+if(DEFINED WITH_FMOD)
+	target_link_libraries(ld3 ${CMAKE_SOURCE_DIR}/fmod/libfmod-3.75.so)
+else()
+	target_link_libraries(ld3 SDL2_mixer)
+endif()
+target_link_libraries(ld3 SDL2)

@@ -14,7 +14,11 @@ using namespace std;
 #include "winapp.h"
 #include "ld3.h"
 #include "entity.h"
+#ifdef WITH_FMOD
 #include "fmod/inc/fmod.h"
+#else
+#include "fake_fmod.h"
+#endif
 #include "time.h"
 
 #endif
