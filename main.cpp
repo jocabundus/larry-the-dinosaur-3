@@ -4,26 +4,10 @@
 
 #include "main.h"
 
-void LD3Main(HINSTANCE hinstance);
+void LD3Main();
 
-int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, LPSTR lpcmdline, int nshowcmd)
+int main(int argc, char **argv)
 {
-	MSG		msg;
-	//
-	//while(WinApp.IsRunning)
-	//{
-	//	if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-	//	{
-	//		if(msg.message == WM_QUIT)
-	//			break;
-	//		TranslateMessage(&msg);
-	//		DispatchMessage(&msg);
-	//	}
-	//	LD3Main();
-	//}
-	
-	LD3Main(hinstance);
-
-	PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
-	return(msg.wParam);
+	LD3Main();
+	return 0;
 }

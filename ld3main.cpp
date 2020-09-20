@@ -19,7 +19,7 @@ bool ProcessInput();				//- takes in the input and processes what's needed based
 void RenderScene();					//- draws the environment, entities, etc
 void ProcessItems();				//- the main function for processing entities, timers, etc
 void ProcessPlayer();				//- process the player
-void LoadScript(char* Filename);	//- loads in the given script and get's it ready for processing
+void LoadScript(const char* Filename);	//- loads in the given script and get's it ready for processing
 void ReadWord(ifstream *File, char *Word);	//- reads a word from the given file
 void ReadQuote(ifstream *File, char *Word);	//- reads what's in the double quotes from the given file
 int  ReadValue(ifstream *File);				//- reads the value of a number from the given file
@@ -35,10 +35,10 @@ void ProcessCannons();											//- make the cannons shoot when their timer hit
 void ScanMap();													//- scan the map at set the values for scores, monsters, etc.
 void FireProjectile(float x, float y, int angle, float speed, int PreDefinedWeapon, ENTITY *owner, int dy);
 void ProcessProjectiles();					//- move the projectiles, check if they hit a wall, the player
-void WriteText(int x, int y, char* Text, DWORD col, UINT format);	//- write a message to the screen
+void WriteText(int x, int y, const char* Text, DWORD col, UINT format);	//- write a message to the screen
 void DeactivateLasers();					//- turn off all the lasers on the map
 void TurnOffWalls();						//- turn off all the walls on the map
-void WriteMessage(char* msg);				//- write a system message on the screen
+void WriteMessage(const char* msg);				//- write a system message on the screen
 void CheckForItems();						//- check if the player is in contact with any items(crystals, bottles, spikes, etc.)
 void NextLevel(int level);					//- load in the next level
 void ResetEntities();						//- ????
@@ -54,7 +54,7 @@ void mnuControls();							//- controls options
 void mnuCredits();							//- show the credits
 void mnuCredits2();							//- show the credits
 bool mnuChooseSlot(bool Loading);			//- process the new/load menu
-void WriteBigFont(int x, int y, char *text);//- write font onto the screen in the big, green letters
+void WriteBigFont(int x, int y, const char *text);//- write font onto the screen in the big, green letters
 void SaveGame();							//- save the game in the Slot
 void PutString(ofstream *File, char *Text);	//- write the given text into the given file
 void DetonateExplosives();					//- detonate the explosives on the map
@@ -118,7 +118,7 @@ float				FocusSwitchTimer = 0;		//- the time before you can switch the focus ent
 //----------------------------------------------------------------------------------------------------------------------------
 //- things relating to script processing
 //----------------------------------------------------------------------------------------------------------------------------
-PALETTEENTRY FadePalette[256];				//- temp palette for fading effects
+SDL_Color FadePalette[256];				//- temp palette for fading effects
 ENTITY	*ScriptEntity[50];					//- pointer to the entity being processed in the script
 UCHAR ScriptProcessed[10];					//- if zero, that number script on the map hasn't been processed
 
@@ -306,8 +306,8 @@ bool				ShiftPalette = true;	//- if true, the last 15 colors of the palette shif
 //int					MusicVolume = 196;		//- the music volume
 //int					MusicFade = 196;		//- slowly adjust to the music volume for smooth fading
 int						sfxVolume = 196;		//- the sound volume
-int						maxMusicVolume = 0;		//- the highest the music volume can go
-int						MusicVolume = 0;		//- the music volume
+int						maxMusicVolume = 196;		//- the highest the music volume can go
+int						MusicVolume = 195;		//- the music volume
 int						MusicFade = 96;			//- slowly adjust to the music volume for smooth fading
 bool				WaitMusicFade = false;	//- if true, the script waits until the music has faded until it continues on
 bool				LoadedBossSong = false; //- a flag that tells whether the boss song has been loaded in yet when the
@@ -348,7 +348,23 @@ bool			PlayedEndOfLevelMusic = false;
 //----------------------------------------------------------------------------------------------------------------------------
 //- things relating to input
 //----------------------------------------------------------------------------------------------------------------------------
-UCHAR				Keyboard[256];				//- holds the keyboard input
+
+// TODO(davidgow): get rid of this
+// NOTE: Copied from https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416627(v=vs.85)
+typedef struct DIJOYSTATE {
+    LONG lX;
+    LONG lY;
+    LONG lZ;
+    LONG lRx;
+    LONG lRy;
+    LONG lRz;
+    LONG rglSlider[2];
+    DWORD rgdwPOV[4];
+    BYTE rgbButtons[32];
+} DIJOYSTATE, *LPDIJOYSTATE;
+
+
+const UCHAR				*Keyboard;				//- holds the keyboard input
 DIJOYSTATE			JoyState;					//- holds the state of the joystick/gamepad
 bool				LockInput = false;			//- if this flag is set to false, the game input will not be processed
 												//- except for the escape key
@@ -360,7 +376,7 @@ WINAPP				WinApp;						//- This class contains the primitives such as surfaces, 
 LD3ENGINE			LD3;						//- This class contains all the drawing functions
 float				Cosine[500], Sine[500];		//- Predefines cosine and sine tables for faster calculation
 bool				EndGame = false;			//- the game will exit if this is false
-MSG  msg;										//- holds the windows messages
+SDL_Event  msg;										//- holds the windows messages
 bool Active;									//- if false, the game isn't processed because the player has activated another
 												//- window
 DWORD active;									//- holds the active state of the window giving by the windows messages
@@ -372,19 +388,19 @@ float				diff = 1;
 //----------------------------------------------------------------------------------------------------------------------------
 //- custom controls
 //----------------------------------------------------------------------------------------------------------------------------
-UCHAR			keyJump		= DIK_LALT;
-UCHAR			keyJump2	= DIK_SPACE;
-UCHAR			keyShoot	= DIK_LCONTROL;
-UCHAR			keyShoot2	= DIK_RCONTROL;
-UCHAR			keyGrenade	= DIK_G;
+UCHAR			keyJump		= SDL_SCANCODE_LALT;
+UCHAR			keyJump2	= SDL_SCANCODE_SPACE;
+UCHAR			keyShoot	= SDL_SCANCODE_LCTRL;
+UCHAR			keyShoot2	= SDL_SCANCODE_RCTRL;
+UCHAR			keyGrenade	= SDL_SCANCODE_G;
 UCHAR			keyGrenade2	= 0;
 UCHAR			keyAim		= 0;
 UCHAR			keyAim2		= 0;
-UCHAR			keyNoFlip	= DIK_LSHIFT;
-UCHAR			keyNoMove	= DIK_RSHIFT;
+UCHAR			keyNoFlip	= SDL_SCANCODE_LSHIFT;
+UCHAR			keyNoMove	= SDL_SCANCODE_RSHIFT;
 UCHAR			keyNoFlip2	= 0;
 UCHAR			keyNoMove2	= 0;
-UCHAR			keySkip		= DIK_S;
+UCHAR			keySkip		= SDL_SCANCODE_S;
 
 UCHAR			joyJump		= 0;
 UCHAR			joyShoot	= 2;
@@ -403,6 +419,14 @@ UCHAR			joyNoMove2	= 5;
 UCHAR			JoyOne		= 0;
 UCHAR			JoyTwo		= 0;
 UCHAR			dpad		= 6;	//- d-pad sensitivity(1 - very sensitive, 10 - not sensitive)
+
+
+#ifndef DT_CENTER
+#define DT_CENTER 1
+#endif
+#ifndef DT_RIGHT
+#define DT_RIGHT 2
+#endif
 //----------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------
 
@@ -412,145 +436,45 @@ UCHAR			dpad		= 6;	//- d-pad sensitivity(1 - very sensitive, 10 - not sensitive)
 //----------------------------------------------------------------------------------------------------------------------------
 //- The windows callback function, when windows sends messages to the app, they get processed here
 //----------------------------------------------------------------------------------------------------------------------------
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+bool WindowProc(SDL_Event *evt)
 {
 
-	PAINTSTRUCT ps;
-	HDC			hdc;
 	float		active;
 	char TileSetFilename[80];
 
-	switch(msg)
+	switch(evt->type)
 	{
-	case WM_CREATE:
+	case SDL_QUIT:
 		{
-			//- When the window is created
-			return(0);			
-		} break;
-	case WM_DESTROY:
+			return true;
+		}
+	case SDL_WINDOWEVENT:
 		{
-			//- When the window is destroyed
-			PostQuitMessage(0);
-			return(0);
-		} break;
-	case WM_PAINT:
-		{
-			if(Active){
-			hdc = BeginPaint(hwnd, &ps);
-			GetWindowRect(hwnd, &LD3.ClipArea);
-			//LD3.WindowResized = true;
-			//- Check if any surfaces are lost
-			//- If they are, restore them and load in the graphics back onto the surface
-			if(WinApp.lpddsprimary)	if(WinApp.lpddsprimary->IsLost() != DD_OK) WinApp.lpddsprimary->Restore();
-			if(WinApp.lpddsback)	if(WinApp.lpddsback->IsLost() != DD_OK)    WinApp.lpddsback->Restore();
-			if(WinApp.lpddsSprites)
-				if(WinApp.lpddsSprites[0]->IsLost() != DD_OK){
-					WinApp.lpddsSprites[0]->Restore();
-					WinApp.lpddsSprites[1]->Restore();
-					WinApp.lpddsSprites[2]->Restore();
-					LD3.LoadSprite(&WinApp, "gfx/lary.put", LARRY_SPRITE_SET, 0);		
-					LD3.LoadSprite(&WinApp, "gfx/bones.put", FLETCHER_SPRITE_SET, 20);
-					LD3.LoadSprite(&WinApp, "gfx/mark.put", MARK_SPRITE_SET, 40);
-					LD3.LoadSprite(&WinApp, "gfx/rusty.put", RUSTY_SPRITE_SET, 60);
-					LD3.LoadSprite(&WinApp, "gfx/xahn.put", XAHN_SPRITE_SET, 80);
-					LD3.LoadSprite(&WinApp, "gfx/general.put", GENERAL_SPRITE_SET, 100);
-					LD3.LoadSprite(&WinApp, "gfx/ld3talk.put", DIALOG_SPRITE_SET, 120);
-					LD3.LoadSprite(&WinApp, "gfx/msonic2.put", SONIC_MONSTER_SPRITE_SET, 0);
-					LD3.LoadSprite(&WinApp, "gfx/newrock.put", ROCK_MONSTER_SPRITE_SET, 30);
-					LD3.LoadSprite(&WinApp, "gfx/spkehead.put", ICED_SPIKEHEAD_SPRITE_SET, 50);
-					LD3.LoadSprite(&WinApp, "gfx/ld3fly.put", FLY_MONSTER_SPRITE_SET, 60);
-					LD3.LoadSprite(&WinApp, "gfx/aldog.put", FLY_MONSTER_SPRITE_SET, 80);
-					LD3.LoadSprite(&WinApp, "gfx/spider.put", SPIDER_SPRITE_SET, 100);
-					LD3.LoadSprite(&WinApp, "gfx/ld3jello.put", JELLY_BLOB_SPRITE_SET, 120);
-					LD3.LoadSprite(&WinApp, "gfx/ld3fire.put", YELLOW_FIRE_SPRITE_SET, 0);
-					LD3.LoadSprite(&WinApp, "gfx/ld3exp.put", EXPLOSION_SPRITE_SET, 40);
-					LD3.LoadSprite(&WinApp, "gfx/bigboss1.put", BOSS_SPRITE_SET, 0);
-					LD3.LoadSprite(&WinApp, "gfx/ld3icons.put", ICON_SPRITE_SET, 40);
-					LD3.LoadFont("gfx/font1.put");
-				}
-				if(WinApp.lpddsTiles)
-					if(WinApp.lpddsTiles[0]->IsLost() != DD_OK){
-						WinApp.lpddsTiles[0]->Restore();
-						LD3.LoadTileSet(&WinApp, "gfx/ld3gplts.put", 500);
-						LD3.LoadTileSet(&WinApp, "gfx/ld3objs.put", 256);
-						memset(TileSetFilename, 0, 80);
-						switch(Level)
-						{
-						case 0:
-							strcpy(TileSetFilename, "gfx/ld3tile0.put");
-							break;
-						case 1:
-							strcpy(TileSetFilename, "gfx/ld3tile1.put");
-							break;
-						case 2:
-							strcpy(TileSetFilename, "gfx/ld3tileh.put");
-							break;
-						case 3:
-							strcpy(TileSetFilename, "gfx/ld3tileo.put");
-							break;
-						case 4:
-							strcpy(TileSetFilename, "gfx/ld3tilef.put");
-							break;
-						case 5:
-							strcpy(TileSetFilename, "gfx/ld3tileg.put");
-							break;
-						case 6:
-							strcpy(TileSetFilename, "gfx/ld3tile6.put");
-							break;
-						case 7:
-							strcpy(TileSetFilename, "gfx/ld3tiled.put");
-							break;
-						case 8:
-							strcpy(TileSetFilename, "gfx/ld3tilez.put");
-							break;
-						case 9:
-							strcpy(TileSetFilename, "gfx/ld3tile0.put");
-							break;						
-						}
-						if(Level < 0) strcpy(TileSetFilename, "gfx/ld3font.put");
-
-						LD3.LoadTileSet(&WinApp, TileSetFilename, 0);
-						
-						//WinApp.lpddpal->Release();
-						//LD3.LoadPalette(&WinApp, "gfx/grad.pal");
-						//WinApp.CreatePalette();
-						//WinApp.SetPalette();
-
-					}
-						
-			EndPaint(hwnd, &ps);
-			}
-			return(0);
-		} break;
-	case WM_SIZE:
-		{
-			//GetWindowRect(hwnd, &LD3.ClipArea);
-			//LD3.WindowResized = true;
-			return(0);
-		} break;
-	case WM_ACTIVATE:
-		{
-			active = LOWORD(wparam);
-			if(active == WA_INACTIVE){
-				Active = false;
-				if(WinApp.WindowMode == false) FMUSIC_SetPaused(song1, true);
-			}
-			else{
-				Active = true;
-				if(WinApp.WindowMode == false) FMUSIC_SetPaused(song1, false);
+			switch(evt->window.event)
+			{
+			case SDL_WINDOWEVENT_FOCUS_LOST:
+				{
+					Active = false;
+					if(WinApp.WindowMode == false) FMUSIC_SetPaused(song1, true);
+				} break;
+			case SDL_WINDOWEVENT_FOCUS_GAINED:
+				{
+					Active = true;
+					if(WinApp.WindowMode == false) FMUSIC_SetPaused(song1, false);
+				} break;
 			}
 			
-			return(0);
+			return false;
 		} break;
-	case WM_KEYDOWN:
+	case SDL_KEYDOWN:
 		{
-			return(0);			
+			return false;			
 		} break;
 
 	}
 	//Active = false;
 
-	return(DefWindowProc(hwnd, msg, wparam, lparam));
+	return false;
 }
 //----------------------------------------------------------------------------------------------------------------------------
 //- End windows callback
@@ -562,7 +486,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 //= Initialize the game by setting the graphics mode, initializing input devices, loading graphics
 //= and sounds, and zeroing buffers
 //=================================================================================================
-void Init(HINSTANCE hinstance)
+void Init()
 {	
 	//- Remove the cursor
 		//ShowCursor(false);
@@ -575,11 +499,10 @@ void Init(HINSTANCE hinstance)
 	//--------------------------------------------
 	//- Initialize the graphics mode
 	//--------------------------------------------		
-		WinApp.hinstance = hinstance;
 		if(WinApp.WindowMode)
-			WinApp.InitWindow(xRes, yRes, WS_OVERLAPPEDWINDOW, WindowProc);
+			WinApp.InitWindow(xRes, yRes, 0, 0);
 		else
-			WinApp.InitWindow(xRes, yRes, WS_POPUP, WindowProc);
+			WinApp.InitWindow(xRes, yRes, SDL_WINDOW_FULLSCREEN_DESKTOP, 0);
 		WinApp.InitDirectDraw(xRes, yRes, 8);
 		WinApp.CreateSurfaces();
 	//--------------------------------------------
@@ -589,9 +512,11 @@ void Init(HINSTANCE hinstance)
 	//--------------------------------------------
 	//- Initialize the input
 	//--------------------------------------------
+#if 0
 		WinApp.InitDirectInput();
 		WinApp.InitKeyboard();
 		WinApp.InitJoy();		
+#endif
 	//--------------------------------------------
 	//- End Initializing the input
 	//--------------------------------------------
@@ -659,6 +584,7 @@ void Init(HINSTANCE hinstance)
 	//--------------------------------------------
 		
 		//- Initialize the sound system
+			FSOUND_SetOutput(FSOUND_OUTPUT_ALSA);
 			FSOUND_Init(44100,32,0);
 
 		//fstep   = FSOUND_Sample_Load(FSOUND_FREE, "sfx/footstep3.wav", FSOUND_NORMAL | FSOUND_LOOP_OFF,0);
@@ -691,9 +617,9 @@ void Init(HINSTANCE hinstance)
 		sndChopper		= FSOUND_Sample_Load(FSOUND_FREE, "sfx/chopper.wav", FSOUND_NORMAL | FSOUND_LOOP_BIDI, 0,0);
 		
 		//mscLevelComplete = FMUSIC_LoadSongEx("music/victory.it", 0, 0, FSOUND_LOOP_OFF, NULL, NULL);
-		mscLevelComplete = FMUSIC_LoadSongEx("music/bonus.mod", 0, 0, FSOUND_LOOP_OFF, NULL, NULL);
-		mscXahnTheme = FMUSIC_LoadSongEx("music/xahn.it", 0, 0, FSOUND_LOOP_OFF, NULL, NULL);
-		mscVRock = FMUSIC_LoadSongEx("music/vrock.mod", 0, 0, 0, NULL, NULL);
+		mscLevelComplete = FMUSIC_LoadSongEx("music/bonus.mod", 0, 0, FSOUND_LOOP_OFF, NULL, 0);
+		mscXahnTheme = FMUSIC_LoadSongEx("music/xahn.it", 0, 0, FSOUND_LOOP_OFF, NULL, 0);
+		mscVRock = FMUSIC_LoadSongEx("music/vrock.mod", 0, 0, 0, NULL, 0);
 						
 		//- Set the master volume for the bonus song
 			FMUSIC_SetMasterVolume(song1, maxMusicVolume);
@@ -718,7 +644,7 @@ void Init(HINSTANCE hinstance)
 		//memset(vCosine, 0, sizeof(float)*360);
 		//memset(vSine, 0, sizeof(float)*360);
 		//memset(FadePalette, 0, sizeof(PALETTEENTRY)*256);
-		memcpy(FadePalette, WinApp.palette, sizeof(PALETTEENTRY)*256);		
+		memcpy(FadePalette, WinApp.palette, sizeof(SDL_Color)*256);		
 		memset(PaletteFilename, 0, 80);
 		memset(LevelFilename, 0, 2000);
 		memset(LevelData, 0, 2000);
@@ -808,6 +734,8 @@ void Init(HINSTANCE hinstance)
 		lfile.close();
 
 	//- load in the controls
+			//TODO(davidgow): Load Controls
+#if 0
 		ifstream sfile;
 
 		sfile.open("controls.dat", ios::binary);
@@ -834,6 +762,7 @@ void Init(HINSTANCE hinstance)
 			sfile.get(dpad);
 
 		sfile.close();
+#endif
 }
 
 
@@ -879,7 +808,7 @@ void Shutdown()
 		FMUSIC_FreeSong(mscLevelComplete);
 		FMUSIC_FreeSong(song1);		
 		//- Restore the cursor
-			ShowCursor(true);
+			SDL_ShowCursor(true);
 	//--------------------------------------------
 	//- End shutting down Larry The Dinosaur III
 	//--------------------------------------------	
@@ -891,47 +820,33 @@ void Shutdown()
 //= This function processes the main loop of the game
 //= This includes calling the functions that draw and calculate the entities
 //=================================================================================================
-void LD3Main(HINSTANCE hinstance)
+void LD3Main()
 {	
-	Init(hinstance);
+	Init();
 	int FPS, FPSCount;
 	FPS = 0; FPSCount = 0;
-	RECT	 DestArea;
-	DDBLTFX  ddbltfx;
-		
-	char cFPS[20], cTemp[20];
+	SDL_Rect DestArea;
 
 	//--------------------------------------------
 	//- Declarations
 	//--------------------------------------------
 		DWORD				dwFrameStartTime;
-		LARGE_INTEGER		FrameStartTime;
-		LARGE_INTEGER		TickCount;
-		LARGE_INTEGER		Frequency;
-		HFONT		g_Font, g_SpeedFont;
-		RECT		FontRect;
+		uint64_t		FrameStartTime;
+		uint64_t		TickCount;
+		uint64_t		Frequency;
 		int			TimeDeductCount = 0;
-		FontRect.left	= 0;
-		FontRect.top	= 0;
-		FontRect.right  = xRes;
-		FontRect.bottom = yRes;
-		LOGFONT Font		= {16,0,0,0,FW_BOLD,false,false,false,DEFAULT_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,PROOF_QUALITY,DEFAULT_PITCH,"Arial"};
-		LOGFONT SpeedFont	= {16,0,0,0,FW_BOLD,true,false,false,DEFAULT_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,PROOF_QUALITY,DEFAULT_PITCH,"Arial"};
-		g_Font		= CreateFontIndirect(&Font);
-		g_SpeedFont	= CreateFontIndirect(&SpeedFont);
 	//--------------------------------------------
 	//- End Declarations
 	//--------------------------------------------
 
-	DestArea.top = 0;
-	DestArea.bottom = yRes;
-	DestArea.left = 0;
-	DestArea.right = xRes;
+	DestArea.y = 0;
+	DestArea.h = yRes;
+	DestArea.x = 0;
+	DestArea.w = xRes;
 
-	//- Set the DDBLTFX structure
-		memset(&ddbltfx, 0, sizeof(DDBLTFX));
-		ddbltfx.dwSize = sizeof(DDBLTFX);		
-		ddbltfx.dwFillColor = 0;
+	//NOTE(davidgow): We need to initialise (allocate) the keyboard array
+	//really early, as otherwise it's read when still 0.
+	Keyboard = SDL_GetKeyboardState(0);
 	
 
 	Player->uani = 10;
@@ -944,7 +859,7 @@ void LD3Main(HINSTANCE hinstance)
 	//LD3.LoadSplashScreen(&WinApp, "gfx/jnk.bmp", 6400);
 	//FMUSIC_StopSong(song1);
 
-	QueryPerformanceFrequency(&Frequency);
+	Frequency = SDL_GetPerformanceFrequency();
 
 	while(!EndGame){
 		
@@ -954,8 +869,8 @@ void LD3Main(HINSTANCE hinstance)
 		//- Load in the starting level
 		if(EndGame == false) NextLevel(Level);
 
-		dwFrameStartTime = GetTickCount();		
-		QueryPerformanceCounter(&FrameStartTime);
+		dwFrameStartTime = SDL_GetTicks();		
+		FrameStartTime = SDL_GetPerformanceCounter();
 
 		LD3.FlipSurfaces(&WinApp);
 		LD3.ClearBuffer(&WinApp, 0);
@@ -968,12 +883,11 @@ void LD3Main(HINSTANCE hinstance)
 		//----------------------------------------------
 		//- Get any windows messages and process them
 		//----------------------------------------------
-			if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			if(SDL_PollEvent(&msg))
 			{
-				if(msg.message == WM_QUIT)
+				if(msg.type == SDL_QUIT)
 					break;
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+				WindowProc(&msg);
 			}
 		//----------------------------------------------
 		//- End getting windows messages
@@ -983,12 +897,10 @@ void LD3Main(HINSTANCE hinstance)
 			if(Active){
 				RenderScene();
 				if(ShowFPS){
-					memset(cFPS, 0, 20);
-					memset(cTemp, 0, 20);
-					strcpy(cTemp, "FPS: ");
-					itoa(FPS, cFPS, 10);
-					strcat(cTemp, cFPS);
+#if 0
+					sprintf(cFPS, "FPS: %d", FPS);
 					WriteText(0, 0, cTemp, 15, 0);
+#endif
 				}
 				ProcessPlayer();
 				ProcessItems();
@@ -1016,18 +928,18 @@ void LD3Main(HINSTANCE hinstance)
 
 			
 			FPSCount++;
-			if(GetTickCount()-dwFrameStartTime >= 1000){
+			if(SDL_GetTicks()-dwFrameStartTime >= 1000){
 				FPS = FPSCount;
 				FPSCount = 0;
-				dwFrameStartTime = GetTickCount();
+				dwFrameStartTime = SDL_GetTicks();
 			}
 			
 			//TickCount = GetTickCount();
 			//diff = float(TickCount-FrameStartTime) / float(1000.0f/75.0f);
 			//FrameStartTime = TickCount;
 
-			QueryPerformanceCounter(&TickCount);
-			diff = float(TickCount.QuadPart-FrameStartTime.QuadPart) / (float)Frequency.QuadPart;//float(1000.0f/75.0f);
+			TickCount = SDL_GetPerformanceCounter();
+			diff = float(TickCount-FrameStartTime)  / (float)Frequency;//float(1000.0f/75.0f);
 			//diff = diff/float(1000.0f/75.0f);
 			diff *= 75;
 			
@@ -1044,12 +956,14 @@ void LD3Main(HINSTANCE hinstance)
 				Player->speed = 0;
 				Player->velocity = 0;
 			}
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
+			//TODO(davidgow): Really should rework this to use Keycodes, not a global.
+			//WinApp.lpdikey->GetDeviceState(256, Keyboard);
+			Keyboard = SDL_GetKeyboardState(0);
 			//if(JoyStickEnabled){
 			//	WinApp.lpdijoy->Poll();
 			//	WinApp.lpdijoy->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 			//}
-			if(Keyboard[DIK_ESCAPE]) break;	
+			if(Keyboard[SDL_SCANCODE_ESCAPE]) break;	
 		//--------------------------------------------
 		//- End processing input
 		//--------------------------------------------
@@ -1063,8 +977,6 @@ void LD3Main(HINSTANCE hinstance)
 	}
 	EnterHiScore();
 	}
-	DeleteObject(g_SpeedFont);
-	DeleteObject(g_Font);
 	Shutdown();
 }
 
@@ -1075,11 +987,11 @@ void LD3Main(HINSTANCE hinstance)
 void Flash(int red, int grn, int blu)
 {
 	for(int n = 0; n <= 255; n++){
-		FadePalette[n].peRed   = (BYTE)red;
-		FadePalette[n].peGreen = (BYTE)grn;
-		FadePalette[n].peBlue  = (BYTE)blu;
+		FadePalette[n].r   = (BYTE)red;
+		FadePalette[n].g = (BYTE)grn;
+		FadePalette[n].b  = (BYTE)blu;
 	}
-	WinApp.lpddpal->SetEntries(0, 0, 256, FadePalette);
+	SDL_SetPaletteColors(WinApp.lpddpal, FadePalette, 0, 256);
 	FadeOutOfWhite = true;
 	Fading = true;
 }
@@ -1100,7 +1012,7 @@ bool ProcessInput()
 		int		my1, my2;
 		int		offset;
 		long	mpt;
-		static  SayCount = 0;
+		static int  SayCount = 0;
 		bool	result = false;
 		char	Text1[40];
 		char	Text2[40];
@@ -1111,11 +1023,13 @@ bool ProcessInput()
 	//------------------------------------------------
 	//- Read the input from the keyboard and gamepad
 	//------------------------------------------------
-		WinApp.lpdikey->GetDeviceState(256, Keyboard);
+		Keyboard = SDL_GetKeyboardState(0);
+#ifdef HAVE_JOYSTICK
 		if(WinApp.JoyStickEnabled){
 			WinApp.lpdijoy[JoyOne]->Poll();
 			WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 		}
+#endif
 	//------------------------------------------------
 	//- End reading input
 	//------------------------------------------------
@@ -1127,13 +1041,13 @@ bool ProcessInput()
 	//------------------------------------------------
 		//- If the escape key is pressed, return true which
 		//- signals the outer function to exit the game
-			if(Keyboard[DIK_ESCAPE]) result = true;
+			if(Keyboard[SDL_SCANCODE_ESCAPE]) result = true;
 
 		//- Take screenshot if the required key is pressed
-			if(Keyboard[DIK_F12]) LD3.TakeScreenshot(&WinApp);
+			if(Keyboard[SDL_SCANCODE_F12]) LD3.TakeScreenshot(&WinApp);
 
 			if(LockInput){
-				if(Keyboard[DIK_LCONTROL] || Keyboard[DIK_LALT] || Keyboard[DIK_SPACE] || JoyState.rgbButtons[0] || JoyState.rgbButtons[2]){
+				if(Keyboard[SDL_SCANCODE_LCTRL] || Keyboard[SDL_SCANCODE_LALT] || Keyboard[SDL_SCANCODE_SPACE] || JoyState.rgbButtons[0] || JoyState.rgbButtons[2]){
 					if(SkipInput){
 						TalkCount = 1000;
 						TalkMsgCount1 = Length1;
@@ -1152,14 +1066,22 @@ bool ProcessInput()
 		if(LockInput == false){
 
 			if(ControllingMAC){
-				if(Keyboard[DIK_RIGHT] || JoyState.lX > dpad){
+				if(Keyboard[SDL_SCANCODE_RIGHT] || JoyState.lX > dpad){
+#ifndef WITH_NO_MOVE
+				MACunit->x += 1.5f*diff;
+#else
 				if(!JoyState.rgbButtons[joyNoMove] && !Keyboard[keyNoMove] && !Keyboard[keyNoMove2]) MACunit->x += 1.5f*diff;
+#endif
 				if(!JoyState.rgbButtons[joyNoFlip] && !Keyboard[keyNoFlip] && !Keyboard[keyNoFlip2]) MACunit->xFlip = false;}
-				if(Keyboard[DIK_LEFT]  || JoyState.lX < -dpad){
+				if(Keyboard[SDL_SCANCODE_LEFT]  || JoyState.lX < -dpad){
+#ifndef WITH_NO_MOVE
+				MACunit->x -= 1.5f*diff;
+#else
 				if(!JoyState.rgbButtons[joyNoMove] && !Keyboard[keyNoMove] && !Keyboard[keyNoMove2]) MACunit->x -= 1.5f*diff;
+#endif
 				if(!JoyState.rgbButtons[joyNoFlip] && !Keyboard[keyNoFlip] && !Keyboard[keyNoFlip2]) MACunit->xFlip = true;}
-				if(Keyboard[DIK_DOWN] || JoyState.lY > dpad) MACunit->y += 1.0f*diff;
-				if(Keyboard[DIK_UP] || JoyState.lY < -dpad) MACunit->y -= 1.0f*diff;
+				if(Keyboard[SDL_SCANCODE_DOWN] || JoyState.lY > dpad) MACunit->y += 1.0f*diff;
+				if(Keyboard[SDL_SCANCODE_UP] || JoyState.lY < -dpad) MACunit->y -= 1.0f*diff;
 
 				if((Keyboard[keyShoot] || Keyboard[keyShoot2] || JoyState.rgbButtons[joyShoot]) && MACammo > 0 && MACunit->lani == MACunit->lstart){
 					MACunit->lani = MACunit->lstart + 1;
@@ -1180,13 +1102,21 @@ bool ProcessInput()
 			//- Check for moving input
 			//------------------------------------------------
 				if(ShowGrenadeCursor == false){					
-					if(Keyboard[DIK_RIGHT] || JoyState.lX > dpad){
+					if(Keyboard[SDL_SCANCODE_RIGHT] || JoyState.lX > dpad){
+#ifndef WITH_NO_MOVE
+						Player->speed += (Player->groundfriction*2)*diff;//.1f;
+#else
 						if(!JoyState.rgbButtons[joyNoMove] && !Keyboard[keyNoMove] && !Keyboard[keyNoMove2]) Player->speed += (Player->groundfriction*2)*diff;//.1f;
+#endif
 						if(!JoyState.rgbButtons[joyNoFlip] && !Keyboard[keyNoFlip] && !Keyboard[keyNoFlip2]) Player->xFlip = false;}
 						//Player->speed += Player->groundfriction*2;//.1f;			
 						//Player->xFlip = false;}
-					if(Keyboard[DIK_LEFT]  || JoyState.lX < -dpad){
+					if(Keyboard[SDL_SCANCODE_LEFT]  || JoyState.lX < -dpad){
+#ifndef WITH_NO_MOVE
+						Player->speed -= (Player->groundfriction*2)*diff;//.1f;
+#else
 						if(!JoyState.rgbButtons[joyNoMove] && !Keyboard[keyNoMove] && !Keyboard[keyNoMove2]) Player->speed -= (Player->groundfriction*2)*diff;//.1f;
+#endif
 						if(!JoyState.rgbButtons[joyNoFlip] && !Keyboard[keyNoFlip] && !Keyboard[keyNoFlip2]) Player->xFlip = true;}
 						//Player->speed -= Player->groundfriction*2;//.1f;
 						//Player->xFlip = true;}
@@ -1197,13 +1127,13 @@ bool ProcessInput()
 			
 				
 				if(ShowGrenadeCursor == true){
-					if(JoyState.lX != 0 || Keyboard[DIK_LEFT] || Keyboard[DIK_RIGHT]){
+					if(JoyState.lX != 0 || Keyboard[SDL_SCANCODE_LEFT] || Keyboard[SDL_SCANCODE_RIGHT]){
 						if(Player->xFlip){
-							if(JoyState.lX < -dpad || Keyboard[DIK_LEFT]) GrenadeAngle --;
-							if(JoyState.lX > dpad || Keyboard[DIK_RIGHT]) GrenadeAngle ++;
+							if(JoyState.lX < -dpad || Keyboard[SDL_SCANCODE_LEFT]) GrenadeAngle --;
+							if(JoyState.lX > dpad || Keyboard[SDL_SCANCODE_RIGHT]) GrenadeAngle ++;
 						}else{
-							if(JoyState.lX < -dpad || Keyboard[DIK_LEFT]) GrenadeAngle ++;
-							if(JoyState.lX > dpad || Keyboard[DIK_RIGHT]) GrenadeAngle --;
+							if(JoyState.lX < -dpad || Keyboard[SDL_SCANCODE_LEFT]) GrenadeAngle ++;
+							if(JoyState.lX > dpad || Keyboard[SDL_SCANCODE_RIGHT]) GrenadeAngle --;
 						}
 						if(GrenadeAngle < 0) GrenadeAngle = 0;
 						if(GrenadeAngle > 90) GrenadeAngle = 90;
@@ -1220,7 +1150,7 @@ bool ProcessInput()
 			//------------------------------------------------
 				if((Keyboard[keyJump] || Keyboard[keyJump2] || JoyState.rgbButtons[joyJump]) &&( (Player->friction == Player->groundfriction && Player->velocity >= 0) || (Swimming == true && Player->uani == 6))){
 					
-					if(JoyState.lY > dpad || Keyboard[DIK_DOWN]){
+					if(JoyState.lY > dpad || Keyboard[SDL_SCANCODE_DOWN]){
 						mpt = int(Player->x)/20+int(Player->y+40)/20*MAPWIDTH+55000;
 						mp = LD3.Map[mpt];
 						mp2 = LD3.Map[mpt+1];
@@ -1244,12 +1174,12 @@ bool ProcessInput()
 			//- Check for look input
 			//------------------------------------------------
 				if(Swimming == false){
-					if((JoyState.lY > dpad || Keyboard[DIK_DOWN]) && Player->velocity == 0){
+					if((JoyState.lY > dpad || Keyboard[SDL_SCANCODE_DOWN]) && Player->velocity == 0){
 						LookTimer++;
 						if(LookTimer >= 60)	yLook += 2;
 						if(yLook > 100) yLook = 100;
 					}
-					else if((JoyState.lY < -dpad || Keyboard[DIK_UP]) && Player->velocity == 0){
+					else if((JoyState.lY < -dpad || Keyboard[SDL_SCANCODE_UP]) && Player->velocity == 0){
 						LookTimer++;
 						if(LookTimer >= 60) yLook -= 2;
 						if(yLook < -80) yLook = -80;
@@ -1261,11 +1191,11 @@ bool ProcessInput()
 					}
 				}
 				else{
-					if(JoyState.lY > dpad || Keyboard[DIK_DOWN]){
+					if(JoyState.lY > dpad || Keyboard[SDL_SCANCODE_DOWN]){
 						Player->velocity += 0.05f;
 						if(Player->velocity > 1.5f) Player->velocity = 1.5f;
 					}
-					if(JoyState.lY < -dpad || Keyboard[DIK_UP]){
+					if(JoyState.lY < -dpad || Keyboard[SDL_SCANCODE_UP]){
 						Player->velocity -= 0.1f;
 					}
 				}
@@ -1318,7 +1248,7 @@ bool ProcessInput()
 			//- time before Larry can switch the weapon again
 			//- to prevent switching too fast
 			//-------------------------------------------------
-				if((Keyboard[DIK_RBRACKET] || JoyState.rgbButtons[joyNext]) && WeaponSelectTimer == 0){
+				if((Keyboard[SDL_SCANCODE_RIGHTBRACKET] || JoyState.rgbButtons[joyNext]) && WeaponSelectTimer == 0){
 					SelectedWeapon += 1;
 					if(SelectedWeapon > NumWeapons)	SelectedWeapon = 0;
 					if(SelectedWeapon < 0)			SelectedWeapon = NumWeapons;
@@ -1332,7 +1262,7 @@ bool ProcessInput()
 					ShootTimer = 0;
 					WeaponSelectTimer = 30;	
 				}
-				if(Keyboard[DIK_LBRACKET] && WeaponSelectTimer == 0){
+				if(Keyboard[SDL_SCANCODE_LEFTBRACKET] && WeaponSelectTimer == 0){
 					SelectedWeapon -= 1;
 					if(SelectedWeapon > NumWeapons)	SelectedWeapon = 0;
 					if(SelectedWeapon < 0)			SelectedWeapon = NumWeapons;
@@ -1530,18 +1460,18 @@ bool ProcessInput()
 			//- End checking shooting input
 			//------------------------------------------------
 
-			/*if(Keyboard[DIK_S]){
+			/*if(Keyboard[SDL_SCANCODE_S]){
 					LoadScript("scripts/sc01.l3s");
-					while(Keyboard[DIK_S]) WinApp.lpdikey->GetDeviceState(256, Keyboard);
+					while(Keyboard[SDL_SCANCODE_S]) WinApp.lpdikey->GetDeviceState(256, Keyboard);
 			}*/
 			}
 			}
 
-			if(Keyboard[DIK_1]) {FadeToBlack = true; Fading = true;}
-			if(Keyboard[DIK_2]) {FadeOutOfBlack = true; Fading = true;}
-			if(Keyboard[DIK_3]) {FadeToWhite = true; Fading = true;}
-			if(Keyboard[DIK_4]) {FadeOutOfWhite = true; Fading = true;}
-			if(Keyboard[DIK_5]){
+			if(Keyboard[SDL_SCANCODE_1]) {FadeToBlack = true; Fading = true;}
+			if(Keyboard[SDL_SCANCODE_2]) {FadeOutOfBlack = true; Fading = true;}
+			if(Keyboard[SDL_SCANCODE_3]) {FadeToWhite = true; Fading = true;}
+			if(Keyboard[SDL_SCANCODE_4]) {FadeOutOfWhite = true; Fading = true;}
+			if(Keyboard[SDL_SCANCODE_5]){
 				Flash(128, 255, 128);
 				Player->lani = SKELETON;
 				Player->lstart = SKELETON;
@@ -1549,7 +1479,7 @@ bool ProcessInput()
 				Player->uani = SKELETON;
 			}
 
-			if(Keyboard[DIK_F]){
+			if(Keyboard[SDL_SCANCODE_F]){
 				if(FPSKey == false){
 					if(ShowFPS)
 						ShowFPS = false;
@@ -1562,31 +1492,31 @@ bool ProcessInput()
 
 			FocusSwitchTimer -= diff;
 			if(FocusSwitchTimer < 0) FocusSwitchTimer = 0;
-			if(Keyboard[DIK_F8] && FocusSwitchTimer == 0){
+			if(Keyboard[SDL_SCANCODE_F8] && FocusSwitchTimer == 0){
 				Focus++;
 				if(Focus > NumMonsters) Focus = 0;
 				FocusEntity = &Monster[Focus];
 				FocusSwitchTimer = 30;
 			}
-			if(Keyboard[DIK_F7] && FocusSwitchTimer == 0){
+			if(Keyboard[SDL_SCANCODE_F7] && FocusSwitchTimer == 0){
 				Focus--;
 				if(Focus < 0) Focus = NumMonsters;
 				FocusEntity = &Monster[Focus];
 				FocusSwitchTimer = 30;
 			}			
-			if(Keyboard[DIK_EQUALS]){
+			if(Keyboard[SDL_SCANCODE_EQUALS]){
 				if(ChangeStatusState){
 					StatusState++;
 					if(StatusState > 5) StatusState = 0;
 				}				
 			}
-			if(Keyboard[DIK_MINUS]){
+			if(Keyboard[SDL_SCANCODE_MINUS]){
 				if(ChangeStatusState){
 					StatusState--;
 					if(StatusState < 0) StatusState = 5;
 				}				
 			}
-			if(Keyboard[DIK_EQUALS] || Keyboard[DIK_MINUS])
+			if(Keyboard[SDL_SCANCODE_EQUALS] || Keyboard[SDL_SCANCODE_MINUS])
 				ChangeStatusState = false;
 			else
 				ChangeStatusState = true;
@@ -1748,7 +1678,7 @@ void RenderScene()
 void ProcessItems()
 {
 	int red, grn, blu, count;
-	PALETTEENTRY ShiftPal[256];
+	SDL_Color ShiftPal[256];
 
 	//--------------------------------------------
 	//- Process Entities
@@ -1808,9 +1738,9 @@ void ProcessItems()
 			PalCount++;
 			if(PalCount > PalSpeed/diff){
 				PalCount = 0;
-				WinApp.lpddpal->GetEntries(0, 240, 15, ShiftPal);
-				WinApp.lpddpal->SetEntries(0, 241, 14, ShiftPal);
-				WinApp.lpddpal->SetEntries(0, 240, 1, &ShiftPal[14]);
+				memcpy(ShiftPal, &WinApp.lpddpal->colors[240], 15 * sizeof(SDL_Color));
+				SDL_SetPaletteColors(WinApp.lpddpal, ShiftPal, 241, 14); 
+				SDL_SetPaletteColors(WinApp.lpddpal, &ShiftPal[14], 240, 1); 
 			}
 		}
 }
@@ -1870,10 +1800,10 @@ void ProcessPlayer()
 }
 
 //=================================================================================================
-//= void LoadScript(char* Filename)
+//= void LoadScript(const char* Filename)
 //= Load an external script file and store it for processing
 //=================================================================================================
-void LoadScript(char* Filename)
+void LoadScript(const char* Filename)
 {
 	//--------------------------------------------------
 	//- Declarations
@@ -1915,24 +1845,24 @@ void LoadScript(char* Filename)
 			Player->setspeed = 0;
 		}
 		
-		ifstream ScriptFile(Filename, ios::binary | ios::nocreate);
-		if(ScriptFile != NULL) FileExist = true;
+		ifstream ScriptFile(Filename, ios::binary);
+		if(ScriptFile) FileExist = true;
 		
-		while(ScriptFile != NULL)
+		while(ScriptFile)
 		{
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
-			if(Keyboard[DIK_ESCAPE]) break;
+			Keyboard = SDL_GetKeyboardState(0);
+			if(Keyboard[SDL_SCANCODE_ESCAPE]) break;
 			
 			memset(&Word1, 0, 20);
 			memset(&Word2, 0, 20);
 						
-			ReadWord(&ScriptFile, &Word1[0]); strupr(Word1);
-			ReadWord(&ScriptFile, &Word2[0]); strupr(Word2);
+			ReadWord(&ScriptFile, &Word1[0]); SDL_strupr(Word1);
+			ReadWord(&ScriptFile, &Word2[0]); SDL_strupr(Word2);
 
 			
 			if(strcmp(Word2, "=") == 0){				
 				memset(&Word2, 0, 20);
-				ReadWord(&ScriptFile, &Word2[0]); strupr(Word2);
+				ReadWord(&ScriptFile, &Word2[0]); SDL_strupr(Word2);
 
 				NewId = true;
 				for(int i = 1; i <= NumIds; i++){
@@ -2226,7 +2156,7 @@ void LoadScript(char* Filename)
 				if(strcmp(Word2, "SAY") == 0 || strcmp(Word2, "TALK") == 0)
 				{
 					memset(&Quote, 0, 80);
-					ReadQuote(&ScriptFile, &Quote[0]); strupr(Quote);
+					ReadQuote(&ScriptFile, &Quote[0]); SDL_strupr(Quote);
 					//EntityTalk(Quote, 2);
 					strcpy(&ScriptMsg[NumMsgs*80], Quote);
 					strcpy(&ScriptIns[NumScripts*20], "TALK");
@@ -2260,7 +2190,7 @@ void LoadScript(char* Filename)
 					if(strcmp(Word2, "WAITANDYSHIFT") == 0) strcpy(Word1, "WAITANDYSHIFT");
 					
 					memset(&Word2, 0, 20);
-					ReadWord(&ScriptFile, &Word2[0]); strupr(Word2);
+					ReadWord(&ScriptFile, &Word2[0]); SDL_strupr(Word2);
 					
 					if(strcmp(Word2, "=") == 0){
 						strcpy(&ScriptIns[NumScripts*20], Word1);
@@ -2271,11 +2201,11 @@ void LoadScript(char* Filename)
 				}
 				else if(strcmp(Word2, "AISTATE") == 0){
 					memset(&Word2, 0, 20);
-					ReadWord(&ScriptFile, &Word2[0]); strupr(Word2);
+					ReadWord(&ScriptFile, &Word2[0]); SDL_strupr(Word2);
 
 					if(strcmp(Word2, "=") == 0){
 						memset(&Word2, 0, 20);
-						ReadWord(&ScriptFile, &Word2[0]); strupr(Word2);
+						ReadWord(&ScriptFile, &Word2[0]); SDL_strupr(Word2);
 
 						strcpy(&ScriptIns[NumScripts*20], Word2);
 						ScriptVal[NumScripts] = 0;
@@ -2307,7 +2237,7 @@ void LoadScript(char* Filename)
 				if(strcmp(Word2, "SAY") == 0 || strcmp(Word2, "TALK") == 0)
 				{
 					memset(&Quote, 0, 80);
-					ReadQuote(&ScriptFile, &Quote[0]); strupr(Quote);								
+					ReadQuote(&ScriptFile, &Quote[0]); SDL_strupr(Quote);								
 				}
 				else if(strcmp(Word2, "XMOVE") == 0 || strcmp(Word2, "YMOVE") == 0 || strcmp(Word2, "LOCKINPUT") == 0)
 				{
@@ -2348,7 +2278,7 @@ void ReadWord(ifstream *File, char *Word)
 {
 	//- Read a word in the given file and return it
 
-	char ch;
+	char ch = 0;
 	int  count = 0;
 		
 	//memset(Word, 0, 20);
@@ -2359,10 +2289,11 @@ void ReadWord(ifstream *File, char *Word)
 		while(ch <= 42 || ch >= 123 || ch == 46) File->get(ch);
 	}
 
-	while(ch >= 43 && ch <= 122 && ch != 46){
+	while(ch >= 43 && ch <= 122 && ch != 46 && ch != 13){
 		Word[count] = ch;
 		count++;
 		File->get(ch);		
+		if (File->eof()) break;
 	}	
 	Word[count] = '\0';
 }
@@ -2438,7 +2369,7 @@ float ReadArithemetic(ifstream *File)
 	while(NO_ONE_CARES)
 	{
 		memset(&Word2, 0, 20);
-		ReadWord(File, &Word2[0]); strupr(Word2);
+		ReadWord(File, &Word2[0]); SDL_strupr(Word2);
 
 		if(strcmp(Word2, ">") == 0) break;
 						
@@ -2448,7 +2379,7 @@ float ReadArithemetic(ifstream *File)
 					
 		if(Id == 0){
 			//memset(&Word2, 0, 20);
-			//ReadWord(File, &Word2[0]); strupr(Word2);
+			//ReadWord(File, &Word2[0]); SDL_strupr(Word2);
 
 			if(strcmp(Word2, "+") == 0) arithemetic = ADD;
 			if(strcmp(Word2, "-") == 0) arithemetic = SUBTRACT;
@@ -2478,7 +2409,7 @@ float ReadArithemetic(ifstream *File)
 		}
 		else{
 			memset(&Word2, 0, 20);
-			ReadWord(File, &Word2[0]); strupr(Word2);
+			ReadWord(File, &Word2[0]); SDL_strupr(Word2);
 
 			switch(arithemetic)
 			{
@@ -2518,7 +2449,7 @@ void EntityTalk(char *Msg, int FaceId)
 	memset(TalkMessage1, 0, 50);
 	memset(TalkMessage2, 0, 50);
 	strcpy(TalkMessage, &Msg[0]);
-	strupr(TalkMessage);
+	SDL_strupr(TalkMessage);
 	//TalkId = FaceId;
 	TalkCount = 0;
 
@@ -2553,7 +2484,7 @@ void EntityTalk(char *Msg, int FaceId)
 		else
 			t = 0;		
 
-		for(i = 0; i <= length-40; i++) TalkMessage2[i+n] = TalkMessage[i+40+t];
+		for(int i = 0; i <= length-40; i++) TalkMessage2[i+n] = TalkMessage[i+40+t];
 	}
 	else
 		strcpy(TalkMessage1, TalkMessage);
@@ -2665,66 +2596,66 @@ void RunScript()
 			PaletteChange = false;
 			if(FadeToBlack){
 				for(int n = 0; n <= 255; n++){
-					red = (int)FadePalette[n].peRed;
-					grn = (int)FadePalette[n].peGreen;
-					blu = (int)FadePalette[n].peBlue;
+					red = (int)FadePalette[n].r;
+					grn = (int)FadePalette[n].g;
+					blu = (int)FadePalette[n].b;
 					if(red > 0) {red -= FADE_SPEED; PaletteChange = true;}
 					if(grn > 0) {grn -= FADE_SPEED; PaletteChange = true;}
 					if(blu > 0) {blu -= FADE_SPEED; PaletteChange = true;}
 					if(red < 0) red = 0;
 					if(grn < 0) grn = 0;
 					if(blu < 0) blu = 0;
-					FadePalette[n].peRed   = (BYTE)red;
-					FadePalette[n].peGreen = (BYTE)grn;
-					FadePalette[n].peBlue  = (BYTE)blu;
+					FadePalette[n].r   = (BYTE)red;
+					FadePalette[n].g = (BYTE)grn;
+					FadePalette[n].b  = (BYTE)blu;
 				}
 			}
 			else if(FadeOutOfBlack){
 				for(int n = 0; n <= 255; n++){
-					red = (int)FadePalette[n].peRed;
-					grn = (int)FadePalette[n].peGreen;
-					blu = (int)FadePalette[n].peBlue;
-					if(red < WinApp.palette[n].peRed)   {red += FADE_SPEED; PaletteChange = true;}
-					if(grn < WinApp.palette[n].peGreen) {grn += FADE_SPEED; PaletteChange = true;}
-					if(blu < WinApp.palette[n].peBlue)  {blu += FADE_SPEED; PaletteChange = true;}
-					if(red > WinApp.palette[n].peRed)   red = WinApp.palette[n].peRed;
-					if(grn > WinApp.palette[n].peGreen) grn = WinApp.palette[n].peGreen;
-					if(blu > WinApp.palette[n].peBlue)  blu = WinApp.palette[n].peBlue;
-					FadePalette[n].peRed   = (BYTE)red;
-					FadePalette[n].peGreen = (BYTE)grn;
-					FadePalette[n].peBlue  = (BYTE)blu;
+					red = (int)FadePalette[n].r;
+					grn = (int)FadePalette[n].g;
+					blu = (int)FadePalette[n].b;
+					if(red < WinApp.palette[n].r)   {red += FADE_SPEED; PaletteChange = true;}
+					if(grn < WinApp.palette[n].g) {grn += FADE_SPEED; PaletteChange = true;}
+					if(blu < WinApp.palette[n].b)  {blu += FADE_SPEED; PaletteChange = true;}
+					if(red > WinApp.palette[n].r)   red = WinApp.palette[n].r;
+					if(grn > WinApp.palette[n].g) grn = WinApp.palette[n].g;
+					if(blu > WinApp.palette[n].b)  blu = WinApp.palette[n].b;
+					FadePalette[n].r   = (BYTE)red;
+					FadePalette[n].g = (BYTE)grn;
+					FadePalette[n].b  = (BYTE)blu;
 				}
 			}
 			else if(FadeToWhite){
 				for(int n = 0; n <= 255; n++){
-					red = (int)FadePalette[n].peRed;
-					grn = (int)FadePalette[n].peGreen;
-					blu = (int)FadePalette[n].peBlue;
+					red = (int)FadePalette[n].r;
+					grn = (int)FadePalette[n].g;
+					blu = (int)FadePalette[n].b;
 					if(red < 255) {red += FADE_SPEED; PaletteChange = true;}
 					if(grn < 255) {grn += FADE_SPEED; PaletteChange = true;}
 					if(blu < 255) {blu += FADE_SPEED; PaletteChange = true;}
 					if(red > 255) red = 255;
 					if(grn > 255) grn = 255;
 					if(blu > 255) blu = 255;
-					FadePalette[n].peRed   = (BYTE)red;
-					FadePalette[n].peGreen = (BYTE)grn;
-					FadePalette[n].peBlue  = (BYTE)blu;
+					FadePalette[n].r   = (BYTE)red;
+					FadePalette[n].g = (BYTE)grn;
+					FadePalette[n].b  = (BYTE)blu;
 				}
 			}
 			else if(FadeOutOfWhite){
 				for(int n = 0; n <= 255; n++){
-					red = (int)FadePalette[n].peRed;
-					grn = (int)FadePalette[n].peGreen;
-					blu = (int)FadePalette[n].peBlue;
-					if(red > WinApp.palette[n].peRed)   {red -= FADE_SPEED; PaletteChange = true;}
-					if(grn > WinApp.palette[n].peGreen) {grn -= FADE_SPEED; PaletteChange = true;}
-					if(blu > WinApp.palette[n].peBlue)  {blu -= FADE_SPEED; PaletteChange = true;}
-					if(red < WinApp.palette[n].peRed)   red = WinApp.palette[n].peRed;
-					if(grn < WinApp.palette[n].peGreen) grn = WinApp.palette[n].peGreen;
-					if(blu < WinApp.palette[n].peBlue)  blu = WinApp.palette[n].peBlue;
-					FadePalette[n].peRed   = (BYTE)red;
-					FadePalette[n].peGreen = (BYTE)grn;
-					FadePalette[n].peBlue  = (BYTE)blu;
+					red = (int)FadePalette[n].r;
+					grn = (int)FadePalette[n].g;
+					blu = (int)FadePalette[n].b;
+					if(red > WinApp.palette[n].r)   {red -= FADE_SPEED; PaletteChange = true;}
+					if(grn > WinApp.palette[n].g) {grn -= FADE_SPEED; PaletteChange = true;}
+					if(blu > WinApp.palette[n].b)  {blu -= FADE_SPEED; PaletteChange = true;}
+					if(red < WinApp.palette[n].r)   red = WinApp.palette[n].r;
+					if(grn < WinApp.palette[n].g) grn = WinApp.palette[n].g;
+					if(blu < WinApp.palette[n].b)  blu = WinApp.palette[n].b;
+					FadePalette[n].r   = (BYTE)red;
+					FadePalette[n].g = (BYTE)grn;
+					FadePalette[n].b  = (BYTE)blu;
 				}
 			}				
 			
@@ -2739,7 +2670,7 @@ void RunScript()
 				//WinApp.lpddpal->Release();
 				//WinApp.lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, FadePalette, &WinApp.lpddpal, NULL);
 				//WinApp.lpddsprimary->SetPalette(WinApp.lpddpal);
-				WinApp.lpddpal->SetEntries(0, 0, 256, FadePalette);
+				SDL_SetPaletteColors(WinApp.lpddpal, FadePalette, 0, 256);
 			}
 		}
 	//--------------------------------------------
@@ -2766,10 +2697,12 @@ void RunScript()
 		if(SkipScene == true && ProScript == false){//ProScript == false && SkipScene == true){
 			SkipScene = false;
 			LD3.LoadPalette(&WinApp, PaletteFilename);
-			memcpy(FadePalette, WinApp.palette, sizeof(PALETTEENTRY)*256);	
-			WinApp.lpddpal->Release();
-			WinApp.lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, FadePalette, &WinApp.lpddpal, NULL);
-			WinApp.lpddsprimary->SetPalette(WinApp.lpddpal);
+			memcpy(FadePalette, WinApp.palette, sizeof(SDL_Color)*256);	
+			SDL_FreePalette(WinApp.lpddpal);
+			WinApp.lpddpal = SDL_AllocPalette(256);
+			SDL_SetPaletteColors(WinApp.lpddpal, FadePalette, 0, 256);
+			SDL_SetSurfacePalette(WinApp.lpddsback, WinApp.lpddpal);
+			//TODO(davidgow): This orignally updated the primary surface palette? Do we need to re-blit?
 			Flash(255,255,255);
 		}
 		if(ss == false) SkipScene = false;
@@ -6262,7 +6195,7 @@ void ProcessMonsters()
 	}
 		
 
-	i = 1;
+	int i = 1;
 	while(i <= NumMonsters)
 	{
 		m = &Monster[i];
@@ -6605,7 +6538,7 @@ void DrawMonsters()
 				}
 				n = Boss->uani+3;
 				ax = 40;
-				for(y = 39; y >= 0; y -= 20){
+				for(int y = 39; y >= 0; y -= 20){
 					for(int x = 39; x >= 0; x -= 20){
 						LD3.PutSprite(&WinApp, int(m->x-xShift+ax+(40-x)), int(m->y-yShift+y-(15-abs(7-(((int)Boss->count3)&15)))), BOSS_SPRITE_SET, n, true);
 						n--;
@@ -6614,7 +6547,7 @@ void DrawMonsters()
 				
 				//- draw head
 				int n = 1;
-				for(y = 0; y <= 59; y += 20){
+				for(int y = 0; y <= 59; y += 20){
 					for(int x = 0; x <= 59; x += 20){
 						LD3.PutSprite(&WinApp, int(m->x-xShift+x), int(m->y-yShift+y), BOSS_SPRITE_SET, n, false);
 						n++;
@@ -6679,7 +6612,7 @@ void DrawMonsters()
 					n = 50;
 					bx = ex-15;
 					by = ey+45;
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 20; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6688,7 +6621,7 @@ void DrawMonsters()
 					n = 46;
 					bx = ex-30;
 					by = ey+45;
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 20; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6699,7 +6632,7 @@ void DrawMonsters()
 					n = 21;
 					bx = ex;
 					by = ey;
-					for(y = 0; y <= 80; y += 20){
+					for(int y = 0; y <= 80; y += 20){
 						for(int x = 0; x <= 80; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6709,7 +6642,7 @@ void DrawMonsters()
 					n = 20;
 					bx = ex+35;
 					by = ey+85;				
-					for(y = 0; y <= 60; y += 20){
+					for(int y = 0; y <= 60; y += 20){
 						for(int x = 0; x <= 60; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n+80, m->xFlip);
 							n++;
@@ -6719,7 +6652,7 @@ void DrawMonsters()
 					n = 60;
 					bx = ex+60;
 					by = ey+60;				
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 40; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6738,7 +6671,7 @@ void DrawMonsters()
 					n = 54;
 					bx = ex+55;
 					by = ey+40;				
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 40; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6748,7 +6681,7 @@ void DrawMonsters()
 					n = 60;
 					bx = ex;
 					by = ey+60;				
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 40; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6757,7 +6690,7 @@ void DrawMonsters()
 					n = 60;
 					bx = ex+10;
 					by = ey+80;				
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 40; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6767,7 +6700,7 @@ void DrawMonsters()
 					n = 0;
 					bx = ex-25;
 					by = ey+85;				
-					for(y = 0; y <= 60; y += 20){
+					for(int y = 0; y <= 60; y += 20){
 						for(int x = 0; x <= 80; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n+80, m->xFlip);
 							n++;
@@ -6777,7 +6710,7 @@ void DrawMonsters()
 					n = 54;
 					bx = ex-5;
 					by = ey+40;				
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 40; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6787,7 +6720,7 @@ void DrawMonsters()
 					n = 1;
 					bx = ex-120;
 					by = ey+30;				
-					for(y = 0; y <= 60; y += 20){
+					for(int y = 0; y <= 60; y += 20){
 						for(int x = 0; x <= 80; x += 20){
 							LD3.PutSprite(&WinApp, bx+x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6808,7 +6741,7 @@ void DrawMonsters()
 					n = 50;
 					bx = ex+15;
 					by = ey+45;
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 20; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6817,7 +6750,7 @@ void DrawMonsters()
 					n = 46;
 					bx = ex+30;
 					by = ey+45;
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 20; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6828,7 +6761,7 @@ void DrawMonsters()
 					n = 21;
 					bx = ex;
 					by = ey;
-					for(y = 0; y <= 80; y += 20){
+					for(int y = 0; y <= 80; y += 20){
 						for(int x = 0; x <= 80; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6838,7 +6771,7 @@ void DrawMonsters()
 					n = 20;
 					bx = ex-35;
 					by = ey+85;				
-					for(y = 0; y <= 60; y += 20){
+					for(int y = 0; y <= 60; y += 20){
 						for(int x = 0; x <= 60; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n+80, m->xFlip);
 							n++;
@@ -6848,7 +6781,7 @@ void DrawMonsters()
 					n = 60;
 					bx = ex-60;
 					by = ey+60;				
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 40; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6867,7 +6800,7 @@ void DrawMonsters()
 					n = 54;
 					bx = ex-55;
 					by = ey+40;				
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 40; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6877,7 +6810,7 @@ void DrawMonsters()
 					n = 60;
 					bx = ex;
 					by = ey+60;				
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 40; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6886,7 +6819,7 @@ void DrawMonsters()
 					n = 60;
 					bx = ex-10;
 					by = ey+80;				
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 40; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6896,7 +6829,7 @@ void DrawMonsters()
 					n = 0;
 					bx = ex+25;
 					by = ey+85;				
-					for(y = 0; y <= 60; y += 20){
+					for(int y = 0; y <= 60; y += 20){
 						for(int x = 0; x <= 80; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n+80, m->xFlip);
 							n++;
@@ -6906,7 +6839,7 @@ void DrawMonsters()
 					n = 54;
 					bx = ex+5;
 					by = ey+40;				
-					for(y = 0; y <= 20; y += 20){
+					for(int y = 0; y <= 20; y += 20){
 						for(int x = 0; x <= 40; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -6916,7 +6849,7 @@ void DrawMonsters()
 					n = 1;
 					bx = ex+120;
 					by = ey+30;				
-					for(y = 0; y <= 60; y += 20){
+					for(int y = 0; y <= 60; y += 20){
 						for(int x = 0; x <= 80; x += 20){
 							LD3.PutSprite(&WinApp, bx-x, by+y, BOSS_SPRITE_SET, n, m->xFlip);
 							n++;
@@ -7046,7 +6979,7 @@ void ProcessParticles()
 		bp->timer--;		
 	}
 
-	i = 1;
+	int i = 1;
 	while(i <= NumParticles)
 	{
 		bp = &Particle[i];
@@ -7133,7 +7066,7 @@ void ScanMap()
 		
 	for(int ml = 0; ml <= 1; ml++)
 	{		
-		for(my = 0; my < MAPHEIGHT; my++)
+		for(int my = 0; my < MAPHEIGHT; my++)
 		{
 			for(int mx = 0; mx < MAPWIDTH; mx++)
 			{
@@ -8175,7 +8108,7 @@ void ScanMap()
 		}
 	}
 
-	for(i = 1; i <= NumMonsters; i++){
+	for(int i = 1; i <= NumMonsters; i++){
 		if(Monster[i].ScoreValue > 0 || Monster[i].id == BLOB_MINE){
 			if(Difficulty == BABY)   SkipEnemy += 7;
 			if(Difficulty == EASY)   SkipEnemy += 5;
@@ -8196,7 +8129,7 @@ void ScanMap()
 			}
 		}	
 	}
-	i = 1;
+	int i = 1;
 	ne = 0;
 	while(i <= NumMonsters)
 	{
@@ -9733,16 +9666,15 @@ void CreateExplosion(int x, int y)
 
 	if(combo >= 2){
 		memset(Text1, 0, 80);
+		// TODO(davidgow): Get rid of Text2 and use snprintf() or similar.
 		memset(Text2, 0, 80);
-		if(combo == 2) strcpy(Text1, "COMBO!  +");
-		if(combo == 3) strcpy(Text1, "TRIPLE COMBO!!  +");
-		if(combo == 4) strcpy(Text1, "QUAD COMBO!!!  +");
-		if(combo == 5) strcpy(Text1, "MONSTER COMBO!!!!  +");
-		if(combo > 5 && combo < 10) strcpy(Text1, "FREAKIN' MONSTER COMBO!!!!  +");
-		if(combo >= 10) strcpy(Text1, "SUPER FREAKIN' MONSTER COMBO!!!!!  +");
+		if(combo == 2) sprintf(Text1, "COMBO!  +%ld", ComboScore);
+		if(combo == 3) sprintf(Text1, "TRIPLE COMBO!!  +%ld", ComboScore);
+		if(combo == 4) sprintf(Text1, "QUAD COMBO!!!  +%ld", ComboScore);
+		if(combo == 5) sprintf(Text1, "MONSTER COMBO!!!!  +%ld", ComboScore);
+		if(combo > 5 && combo < 10) sprintf(Text1, "FREAKIN' MONSTER COMBO!!!!  +%ld", ComboScore);
+		if(combo >= 10) sprintf(Text1, "SUPER FREAKIN' MONSTER COMBO!!!!!  +%ld", ComboScore);
 
-		itoa(ComboScore, Text2, 10);
-		strcat(Text1, Text2);
 		WriteMessage(Text1);
 
 		Score += ComboScore;
@@ -9806,7 +9738,7 @@ void ProcessExplosions()
 
 		if(e->l >= 31) de ++;
 	}
-	if(de) for(i = de+1; i <= NumExplosions; i++)	Explosion[i-de] = Explosion[i];
+	if(de) for(int i = de+1; i <= NumExplosions; i++)	Explosion[i-de] = Explosion[i];
 	NumExplosions -= de;	
 }
 
@@ -9954,7 +9886,7 @@ void ProcessProjectiles()
 		}
 	}
 
-	i = 1;
+	int i = 1;
 	while(i <= NumProjectiles)
 	{
 		p = &Projectile[i];
@@ -9971,7 +9903,7 @@ void ProcessProjectiles()
 }
 
 //==============================================================================================================
-//= void WriteText(int x, int y, HFONT *Font, char* Text, DWORD col, UINT format)
+//= void WriteText(int x, int y, HFONT *Font, const char* Text, DWORD col, UINT format)
 //= This function writes the message given to the video buffer
 //= x, y	- the upper-left coordinate of where the text will be place on the screen
 //= *Text	- a pointer to the character buffer holding the message
@@ -9980,7 +9912,7 @@ void ProcessProjectiles()
 //=			- DT_CENTER centers the text
 //=			- DT_RIGHT  right justifies the text
 //==============================================================================================================
-void WriteText(int x, int y, char* Text, DWORD col, UINT format)
+void WriteText(int x, int y, const char* Text, DWORD col, UINT format)
 {
 	RECT	FontRect;
 	//HDC		xdc;
@@ -9994,7 +9926,7 @@ void WriteText(int x, int y, char* Text, DWORD col, UINT format)
 	char Text1[80];
 
 	strcpy(Text1, Text);
-	strupr(Text1);
+	SDL_strupr(Text1);
 
 	if(format == DT_CENTER) center = true;
 	if(format == DT_RIGHT) x = xRes-strlen(Text1)*7;
@@ -10024,7 +9956,7 @@ void WriteText(int x, int y, char* Text, DWORD col, UINT format, bool Scroll)
 	char Text1[80];
 
 	strcpy(Text1, Text);
-	strupr(Text1);
+	SDL_strupr(Text1);
 
 	if(format == DT_CENTER) center = true;
 	if(format == DT_RIGHT) x = xRes-strlen(Text1)*7;
@@ -10138,11 +10070,11 @@ void TurnOffWalls()
 }
 
 //==============================================================================================================
-//= void WriteMessage(char *msg)
+//= void WriteMessage(const char *msg)
 //= Copy the given message to the global system message that displays on the screen
 //= Set the system message timer to enough time for the player to read the message
 //==============================================================================================================
-void WriteMessage(char *msg)
+void WriteMessage(const char *msg)
 {
 	strcpy(SysMsg, msg);
 	SysMsgCount = 500;	
@@ -10589,12 +10521,7 @@ void CheckForItems()
 			LD3.Map[mpt]	= 0;
 			ScriptProcessed[mp-miScript1] = 1;
 			memset(ScriptFilename, 0, 80);
-			strcpy(ScriptFilename, "scripts/");
-			strcat(ScriptFilename, &LevelName[Level*80]);
-			memset(text, 0, 20);
-			itoa(mp-miScript1+1, text, 10);
-			strcat(ScriptFilename, text);
-			strcat(ScriptFilename, ".l3s");
+			sprintf(ScriptFilename, "scripts/%s%d.l3s", &LevelName[Level*80], mp-miScript1+1);
 			LoadScript(ScriptFilename);
 			//WriteMessage(ScriptFilename);
 		}
@@ -10947,7 +10874,7 @@ void NextLevel(int level)
 			memset(word1, 0, 20);
 			memset(word2, 0, 20);
 			ReadWord(&mfile, word1);
-			strupr(word1);
+			SDL_strupr(word1);
 
 			do{
 				memset(text, 0, 40);
@@ -10991,18 +10918,19 @@ void NextLevel(int level)
 					song1   = FMUSIC_LoadSong(text);
 				}
 				if(strcmp(word1, "MESSAGE:") == 0){
-					ReadQuote(&mfile, word2); strupr(word2);
+					ReadQuote(&mfile, word2); SDL_strupr(word2);
 					strcpy(LevelMessage, word2);
 					WriteMessage (word2);
 				}
 				if(strcmp(word1, "BOSSSET:") == 0){
-					ReadQuote(&mfile, word2); strupr(word2);
+					ReadQuote(&mfile, word2); SDL_strlwr(word2);
 					strcpy(text, "gfx/");
 					strcat(text, word2);
 					LD3.LoadSprite(&WinApp, text, BOSS_SPRITE_SET, 0);
 				}
 				if(strcmp(word1, "LARRYSET:") == 0){
-					ReadQuote(&mfile, word2); strupr(word2);
+					//NOTE(davidgow): filenames will be lowercase
+					ReadQuote(&mfile, word2); SDL_strlwr(word2);
 					strcpy(text, "gfx/");
 					strcat(text, word2);
 					LD3.LoadSprite(&WinApp, text, LARRY_SPRITE_SET, 0);
@@ -11010,26 +10938,26 @@ void NextLevel(int level)
 					LD3.LoadSprite(&WinApp, "gfx/mark.put", MARK_SPRITE_SET, 60);
 				}
 				if(strcmp(word1, "BONESSET:") == 0){
-					ReadQuote(&mfile, word2); strupr(word2);
+					ReadQuote(&mfile, word2); SDL_strlwr(word2);
 					strcpy(text, "gfx/");
 					strcat(text, word2);
 					LD3.LoadSprite(&WinApp, text, FLETCHER_SPRITE_SET, 40);					
 					LD3.LoadSprite(&WinApp, "gfx/mark.put", MARK_SPRITE_SET, 60);
 				}
 				if(strcmp(word1, "RUSTYSET:") == 0){
-					ReadQuote(&mfile, word2); strupr(word2);
+					ReadQuote(&mfile, word2); SDL_strlwr(word2);
 					strcpy(text, "gfx/");
 					strcat(text, word2);
 					LD3.LoadSprite(&WinApp, text, RUSTY_SPRITE_SET, 80);
 				}
 				if(strcmp(word1, "BOSSSONG:") == 0){
-					ReadQuote(&mfile, word2); strupr(word2);
+					ReadQuote(&mfile, word2); SDL_strlwr(word2);
 					strcpy(text, "music/");
 					strcat(text, word2);
 					mscBoss = FMUSIC_LoadSong(text);
 				}
 				if(strcmp(word1, "LOADSPRITE:") == 0){
-					ReadQuote(&mfile, word2); strupr(word2);
+					ReadQuote(&mfile, word2); SDL_strlwr(word2);
 					strcpy(text, "gfx/");
 					strcat(text, word2);
 
@@ -11039,7 +10967,7 @@ void NextLevel(int level)
 					LD3.LoadSprite(&WinApp, text, y1, y2);					
 				}
 				if(strcmp(word1, "OBJNAME:") == 0){
-					ReadQuote(&mfile, word2); strupr(word2);
+					ReadQuote(&mfile, word2); SDL_strupr(word2);
 					memset(ObjectName, 0, 20);
 					strcpy(ObjectName, word2);
 				}
@@ -11074,7 +11002,7 @@ void NextLevel(int level)
 				memset(word1, 0, 20);
 				memset(word2, 0, 20);
 				ReadWord(&mfile, word1);
-				strupr(word1);
+				SDL_strupr(word1);
 				
 			} while(strcmp(word1, "END") != 0);
 
@@ -11267,11 +11195,13 @@ void NextLevel(int level)
 	if(TileSet2) LD3.LoadTileSet(&WinApp, TileSetFilename2, 162);
 	LD3.LoadPalette(&WinApp, PaletteFilename);
 
-	memcpy(FadePalette, WinApp.palette, sizeof(PALETTEENTRY)*256);
+	memcpy(FadePalette, WinApp.palette, sizeof(SDL_Color)*256);
 	
-	WinApp.lpddpal->Release();
-	WinApp.lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, FadePalette, &WinApp.lpddpal, NULL);
-	WinApp.lpddsprimary->SetPalette(WinApp.lpddpal);
+	SDL_FreePalette(WinApp.lpddpal);
+	WinApp.lpddpal = SDL_AllocPalette(256);
+	SDL_SetPaletteColors(WinApp.lpddpal, FadePalette, 0, 256);
+	SDL_SetSurfacePalette(WinApp.lpddsback, WinApp.lpddpal);
+	//TODO(davidgow): Again, this was the primary surface.
 
 	/*if(level == -1){
 		//LD3.LoadSky(&WinApp, "gfx/backgrounds/titletop.bmp", 0, 1);
@@ -11650,13 +11580,7 @@ void DisplayHUD()
 			WriteText(0, 70, "Bonus +1000", 15, DT_CENTER);
 			
 			memset(Text1, 0, 80); memset(Text2, 0, 80);
-			strcpy(Text1, "Secrets Found ");
-			itoa(Secrets, Text2, 10);
-			strcat(Text1, Text2);
-			memset(Text2, 0, 80);
-			itoa(NumSecrets, Text2, 10);
-			strcat(Text1, "/");
-			strcat(Text1, Text2);
+			sprintf(Text1, "Secrets Found %d/%d", Secrets, NumSecrets);
 
 			if(PlayedEndOfLevelMusic == false){
 				FMUSIC_StopSong(song1);
@@ -11781,10 +11705,7 @@ void DisplayHUD()
 			}
 			if(StatusState > 0){
 				memset(Text1, 0, 80); memset(Text2, 0, 80);
-				itoa(CrystalCount, Text1, 10);
-				itoa(TotalCrystals, Text2, 10);
-				strcat(Text1, "/");
-				strcat(Text1, Text2);
+				sprintf(Text1, "%d/%d", CrystalCount, TotalCrystals);
 				LD3.PutSprite(&WinApp, 127, yRes-28, -1, miGreenCrystal, false);
 				LD3.PutSprite(&WinApp, 137, yRes-28, -1, miYellowCrystal, false);
 				LD3.PutSprite(&WinApp, 147, yRes-28, -1, miBlueCrystal, false);
@@ -11793,19 +11714,13 @@ void DisplayHUD()
 			}
 			if(StatusState > 1){
 				memset(Text1, 0, 80); memset(Text2, 0, 80);
-				itoa(NumKills, Text1, 10);
-				itoa(TotalKills, Text2, 10);
-				strcat(Text1, "/");
-				strcat(Text1, Text2);
+				sprintf(Text1, "%d/%d", NumKills, TotalKills);
 				WriteText(185, yRes-17, "Kills", 28, 0);
 				WriteText(185, yRes-9, Text1, 15, 0);
 			}
 			if(StatusState > 2){
 				memset(Text1, 0, 80); memset(Text2, 0, 80);
-				itoa(Secrets, Text1, 10);
-				itoa(NumSecrets, Text2, 10);
-				strcat(Text1, "/");
-				strcat(Text1, Text2);
+				sprintf(Text1, "%d/%d", Secrets, NumSecrets);
 				WriteText(285, yRes-17, "S:", 28, 0);
 				WriteText(300, yRes-17, Text1, 15, 0);
 			}
@@ -11825,10 +11740,10 @@ void DisplayHUD()
 		//- Display Score
 		//--------------------------------------------
 				memset(Text1, 0, 80); memset(Text2, 0, 80);
-				strcpy(Text1, "Score: "); itoa(ScoreDisplay, Text2, 10);
-				strcat(Text1, Text2);
+				sprintf(Text1, "Score: %ld", ScoreDisplay);
 				WriteText(2, yRes-9, Text1, 90, DT_RIGHT);
-				memset(Text1, 0, 80); itoa(ScoreDisplay, Text1, 10);
+				memset(Text1, 0, 80);
+				sprintf(Text1, "%ld", ScoreDisplay);
 				WriteText(50, yRes-9, Text1, 15, DT_RIGHT);
 		//--------------------------------------------
 		//	end displaying score
@@ -11847,7 +11762,7 @@ void DisplayHUD()
 		//- Display life bar
 		//--------------------------------------------
 			memset(Text1, 0, 80);
-			itoa(Lives, Text1, 10);
+			sprintf(Text1, "%d", Lives);
 			WriteText(106, yRes-9, "x", 28, 0);
 			WriteText(113, yRes-9, Text1, 15, 0);
 		//--------------------------------------------
@@ -11859,24 +11774,26 @@ void DisplayHUD()
 		//--------------------------------------------
 			memset(Text1, 0, 80);
 			WriteText(2,  yRes-16, "Ammo:", 28, 0);
+			int AmmoValue = -1;
 			switch(Weapon[SelectedWeapon])
 			{
 			case SHOTGUN:
-				itoa(Shells, Text1, 10);
+				AmmoValue = Shells;
 				break;
 			case MACHINEGUN:
-				itoa(Bullets, Text1, 10);
+				AmmoValue = Bullets;
 				break;
 			case MAC:
-				itoa(Choppers, Text1, 10);
+				AmmoValue = Choppers;
 				break;
 			}
+			sprintf(Text1, "%d", AmmoValue);
 			WriteText(40, yRes-16, Text1, 15, 0);
 			//WriteText(2, 224, "Grenades:", 28, 0);
 			LD3.PutSprite(&WinApp, 60, yRes-30, -1, miGrenade, false);
 			WriteText(75, yRes-16, "x", 28, 0);
 			memset(Text1, 0, 80);
-			itoa(Grenades, Text1, 10);
+			sprintf(Text1, "%d", Grenades);
 			WriteText(82, yRes-16, Text1, 15, 0);
 		//--------------------------------------------
 		//- End Display Ammo
@@ -11973,12 +11890,11 @@ void mnuTitle()
 
 	while(NO_ONE_CARES)
 	{
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if(SDL_PollEvent(&msg))
 		{
-			if(msg.message == WM_QUIT)
+			if(msg.type == SDL_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			WindowProc(&msg);
 		}
 		
 		LD3.DrawSky(&WinApp, xShift, 0);
@@ -11993,7 +11909,7 @@ void mnuTitle()
 
 		SlideChange = false;
 		if(SlideIn){
-			for(i = 0; i <= 5; i++){
+			for(int i = 0; i <= 5; i++){
 				if(px[i] > 200){
 					px[i] -= (8-i)<<1;
 					SlideChange = true;
@@ -12002,7 +11918,7 @@ void mnuTitle()
 			}
 		}
 		else if(SlideOut){
-			for(i = 0; i <= 5; i++){
+			for(int i = 0; i <= 5; i++){
 				if(px[i] < 420){
 					px[i] += (i+4)<<1;
 					SlideChange = true;
@@ -12032,7 +11948,7 @@ void mnuTitle()
 				if(Selection == 3){mnuScores();  HoldTimer = HoldDelay; ResetSlide = true;}
 				if(ResetSlide){
 					px[0] = 340;
-					for(i = 1; i <= 4; i++) px[i] = 340+i*20;
+					for(int i = 1; i <= 4; i++) px[i] = 340+i*20;
 					SlideIn = true;
 					ResetSlide = false;
 				}
@@ -12063,30 +11979,35 @@ void mnuTitle()
 
 		if(Active){
 		//- Process the input
+#if 0
+			//TODO(davidgow): Joystick support.
 			WinApp.lpdikey->GetDeviceState(256, Keyboard);
 			if(WinApp.JoyStickEnabled){
 				WinApp.lpdijoy[JoyOne]->Poll();
 				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 			}
+#else
+			memset(&JoyState, 0, sizeof(DIJOYSTATE));
+#endif
 
 			HoldTimer--;
 			PlaySound = false;
 			if(HoldTimer <= 0) HoldTimer = 0;
 			if(HoldTimer <= 0){
-				//if(Keyboard[DIK_ESCAPE]){Selection = 5; SlideOut = true; SlideIn = false;} //{EndGame = true; break;}
-				if(Keyboard[DIK_SPACE] || Keyboard[DIK_LCONTROL] || Keyboard[DIK_RETURN] || JoyState.rgbButtons[0]){
+				//if(Keyboard[SDL_SCANCODE_ESCAPE]){Selection = 5; SlideOut = true; SlideIn = false;} //{EndGame = true; break;}
+				if(Keyboard[SDL_SCANCODE_SPACE] || Keyboard[SDL_SCANCODE_LCTRL] || Keyboard[SDL_SCANCODE_RETURN] || JoyState.rgbButtons[0]){
 					Selection = Arrow;
 					SlideOut = true;
 				}
 			
-				if(Keyboard[DIK_UP] || JoyState.lY < -dpad){
+				if(Keyboard[SDL_SCANCODE_UP] || JoyState.lY < -dpad){
 					Col[Arrow] = 15;
 					Arrow -= 1;
 					HoldTimer = HoldDelay;
 					if(Arrow < 0) Arrow = 0; else PlaySound = true;
 					Col[Arrow] = 40;					
 				}
-				if(Keyboard[DIK_DOWN] || JoyState.lY > dpad){
+				if(Keyboard[SDL_SCANCODE_DOWN] || JoyState.lY > dpad){
 					Col[Arrow] = 15;
 					Arrow += 1;
 					HoldTimer = HoldDelay;
@@ -12134,11 +12055,11 @@ void mnuScores()
 
 		//- get the initials
 		memset(Initial, 0, 40);
-		for(i = 1; i <= 10; i++)			
+		for(int i = 1; i <= 10; i++)			
 			ReadWord(&ScoreFile, &Initial[i*4]);
 		//- get the scores
 		memset(HiScore, 0, 200);
-		for(i = 1; i <= 10; i++){
+		for(int i = 1; i <= 10; i++){
 			//score = ReadValue(&ScoreFile);			
 			//itoa(score, &Score[i*20], 10);
 			ReadWord(&ScoreFile, &HiScore[i*20]);
@@ -12147,12 +12068,11 @@ void mnuScores()
 
 	while(NO_ONE_CARES)
 	{
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if(SDL_PollEvent(&msg))
 		{
-			if(msg.message == WM_QUIT)
+			if(msg.type == SDL_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			WindowProc(&msg);
 		}
 		
 		LD3.DrawSky(&WinApp, xShift, 0);
@@ -12178,7 +12098,7 @@ void mnuScores()
 
 		SlideChange = false;
 		if(SlideIn){
-			for(i = 0; i <= 10; i++){
+			for(int i = 0; i <= 10; i++){
 				if(px[i] > 100){
 					px[i] -= (14-i)<<1;
 					SlideChange = true;
@@ -12187,7 +12107,7 @@ void mnuScores()
 			}
 		}
 		else if(SlideOut){
-			for(i = 0; i <= 10; i++){
+			for(int i = 0; i <= 10; i++){
 				if(px[i] < 360){
 					px[i] += (i+4)<<1;
 					SlideChange = true;
@@ -12223,18 +12143,21 @@ void mnuScores()
 
 		if(Active){
 		//- Process the input
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
+			Keyboard = SDL_GetKeyboardState(0);
+#if 0
+			//TODO(davidgow): Joystick support
 			if(WinApp.JoyStickEnabled){
 				WinApp.lpdijoy[JoyOne]->Poll();
 				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 			}
+#endif
 
 			HoldTimer--;
 			PlaySound = false;
 			if(HoldTimer <= 0) HoldTimer = 0;
 			if(HoldTimer <= 0){
-				if(Keyboard[DIK_ESCAPE]) SlideOut = true;
-				if(Keyboard[DIK_SPACE] || Keyboard[DIK_LCONTROL] || Keyboard[DIK_RETURN] || JoyState.rgbButtons[0]) SlideOut = true;				
+				if(Keyboard[SDL_SCANCODE_ESCAPE]) SlideOut = true;
+				if(Keyboard[SDL_SCANCODE_SPACE] || Keyboard[SDL_SCANCODE_LCTRL] || Keyboard[SDL_SCANCODE_RETURN] || JoyState.rgbButtons[0]) SlideOut = true;				
 			}
 
 			if(PlaySound) FSOUND_PlaySound(FSOUND_FREE,sndItemPickup);			
@@ -12275,13 +12198,13 @@ void EnterHiScore()
 		for(int i = 0; i <= 9; i++)			
 			ReadWord(&ScoreFile, &Initial[i*10]);
 		//- get the scores		
-		for(i = 0; i <= 9; i++)
+		for(int i = 0; i <= 9; i++)
 			HiScore[i] = ReadValue(&ScoreFile);
 	ScoreFile.close();
 
 	//- Check if the player's score is within the hiscores
 
-	for(i = 0; i <= 9; i++){
+	for(int i = 0; i <= 9; i++){
 		if(Score > HiScore[i] && i == 0) PlayerRank = 0;
 		if(Score < HiScore[i] && Score > HiScore[i+1] && i < 9) PlayerRank = i+1;
 		if(Score == HiScore[i] && Score > HiScore[i+1] && i < 9) PlayerRank = i+1;
@@ -12291,12 +12214,11 @@ void EnterHiScore()
 	
 	while(PlayerRank > -1)
 	{
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if(SDL_PollEvent(&msg))
 		{
-			if(msg.message == WM_QUIT)
+			if(msg.type == SDL_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			WindowProc(&msg);
 		}
 
 		
@@ -12317,43 +12239,46 @@ void EnterHiScore()
 
 		LD3.FlipSurfaces(&WinApp);
 
-		WinApp.lpdikey->GetDeviceState(256, Keyboard);
+		Keyboard = SDL_GetKeyboardState(0);
+#if 0
+		//TODO(davidgow): Joystick
 		if(WinApp.JoyStickEnabled){
 			WinApp.lpdijoy[JoyOne]->Poll();
 			WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 		}
+#endif
 
-		if(Keyboard[DIK_Q]) break;
+		if(Keyboard[SDL_SCANCODE_Q]) break;
 		HoldCount--;
 		if(HoldCount <= 0){
 			HoldCount = 0;
-			if(Keyboard[DIK_DOWN] || JoyState.lY > dpad){
+			if(Keyboard[SDL_SCANCODE_DOWN] || JoyState.lY > dpad){
 				*Letter -= 1;
 				if(*Letter < 65) *Letter = 90;
 				HoldCount = 10;
 				PlaySound = true;
 			}
-			if(Keyboard[DIK_UP] || JoyState.lY < -dpad){
+			if(Keyboard[SDL_SCANCODE_UP] || JoyState.lY < -dpad){
 				*Letter += 1;				
 				if(*Letter > 90) *Letter = 65;
 				HoldCount = 10;
 				PlaySound = true;
 			}
-			if(Keyboard[DIK_LEFT] || JoyState.lX < -dpad){
+			if(Keyboard[SDL_SCANCODE_LEFT] || JoyState.lX < -dpad){
 				InitialCount -= 1;
 				if(InitialCount < 0) InitialCount = 0;
 				Letter = &PlayerInitial[InitialCount];
 				HoldCount = 10;
 				PlaySound = true;
 			}
-			if(Keyboard[DIK_RIGHT] || JoyState.lX > dpad){
+			if(Keyboard[SDL_SCANCODE_RIGHT] || JoyState.lX > dpad){
 				InitialCount += 1;
 				if(InitialCount > 2) InitialCount = 2;
 				Letter = &PlayerInitial[InitialCount];
 				HoldCount = 10;
 				PlaySound = true;
 			}
-			if(Keyboard[DIK_RETURN] || Keyboard[DIK_SPACE] || JoyState.rgbButtons[0]){
+			if(Keyboard[SDL_SCANCODE_RETURN] || Keyboard[SDL_SCANCODE_SPACE] || JoyState.rgbButtons[0]){
 				break;
 			}
 		}
@@ -12367,7 +12292,7 @@ void EnterHiScore()
 	if(PlayerRank > -1){
 
 		//- Insert the player's score within the rankings
-		for(i = 8; i >= PlayerRank; i--){
+		for(int i = 8; i >= PlayerRank; i--){
 			memcpy(&Initial[(i+1)*10], &Initial[i*10], 4);
 			HiScore[i+1] = HiScore[i];
 		}		
@@ -12383,8 +12308,8 @@ void EnterHiScore()
 			for(int i = 0; i <= 9; i++)				
 				PutString(&ScoreFile2, &Initial[i*10]);
 			//- write the scores		
-			for(i = 0; i <= 9; i++){
-				itoa(HiScore[i], &cHiScore[i*20], 10);
+			for(int i = 0; i <= 9; i++){
+				sprintf(&cHiScore[i*20], "%d", HiScore[i]);
 				PutString(&ScoreFile2, &cHiScore[i*20]);
 			}
 
@@ -12418,12 +12343,11 @@ void mnuOptions()
 
 	while(NO_ONE_CARES)
 	{
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if(SDL_PollEvent(&msg))
 		{
-			if(msg.message == WM_QUIT)
+			if(msg.type == SDL_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			WindowProc(&msg);
 		}
 		
 		LD3.DrawSky(&WinApp, xShift, 0);
@@ -12445,7 +12369,7 @@ void mnuOptions()
 
 		SlideChange = false;
 		if(SlideIn){
-			for(i = 0; i <= 4; i++){
+			for(int i = 0; i <= 4; i++){
 				if(px[i] > 200){
 					px[i] -= (8-i)<<1;
 					SlideChange = true;
@@ -12454,7 +12378,7 @@ void mnuOptions()
 			}
 		}
 		else if(SlideOut){
-			for(i = 0; i <= 4; i++){
+			for(int i = 0; i <= 4; i++){
 				if(px[i] < 400){
 					px[i] += (i+4)<<1;
 					SlideChange = true;
@@ -12476,7 +12400,7 @@ void mnuOptions()
 				//break;
 				if(ResetSlide){
 					px[0] = 340;
-					for(i = 1; i <= 4; i++) px[i] = 340+i*20;
+					for(int i = 1; i <= 4; i++) px[i] = 340+i*20;
 					SlideIn = true;
 					ResetSlide = false;
 				}				
@@ -12503,13 +12427,15 @@ void mnuOptions()
 		if(Active){
 		//- Process the input
 			PlaySound = false;
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
+			Keyboard = SDL_GetKeyboardState(0);
+#if 0
 			if(WinApp.JoyStickEnabled){
 				WinApp.lpdijoy[JoyOne]->Poll();
 				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 			}
+#endif
 
-			if(Keyboard[DIK_ESCAPE]){
+			if(Keyboard[SDL_SCANCODE_ESCAPE]){
 				Selection = 4; 
 				SlideOut = true;
 			}
@@ -12518,19 +12444,19 @@ void mnuOptions()
 			if(HoldTimer <= 0) HoldTimer = 0;
 			if(HoldTimer <= 0){
 				
-				if(Keyboard[DIK_SPACE] || Keyboard[DIK_LCONTROL] || Keyboard[DIK_RETURN] || JoyState.rgbButtons[0]){
+				if(Keyboard[SDL_SCANCODE_SPACE] || Keyboard[SDL_SCANCODE_LCTRL] || Keyboard[SDL_SCANCODE_RETURN] || JoyState.rgbButtons[0]){
 					Selection = Arrow;
 					SlideOut = true;
 				}
 							
-				if(Keyboard[DIK_UP] || JoyState.lY < -dpad){
+				if(Keyboard[SDL_SCANCODE_UP] || JoyState.lY < -dpad){
 					Col[Arrow] = 15;
 					Arrow -= 1;
 					HoldTimer = HoldDelay;
 					if(Arrow < 0) Arrow = 0; else PlaySound = true;
 					Col[Arrow] = 40;					
 				}
-				if(Keyboard[DIK_DOWN] || JoyState.lY > dpad){
+				if(Keyboard[SDL_SCANCODE_DOWN] || JoyState.lY > dpad){
 					Col[Arrow] = 15;
 					Arrow += 1;
 					HoldTimer = HoldDelay;
@@ -12576,12 +12502,11 @@ void mnuSound()
 
 	while(NO_ONE_CARES)
 	{
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if(SDL_PollEvent(&msg))
 		{
-			if(msg.message == WM_QUIT)
+			if(msg.type == SDL_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			WindowProc(&msg);
 		}
 		
 		LD3.DrawSky(&WinApp, xShift, 0);
@@ -12607,18 +12532,18 @@ void mnuSound()
 
 		memset(text, 0, 20);
 		temp = (float)maxMusicVolume*product;
-		itoa(temp, text, 10);
+		sprintf(text, "%d", temp);
 		WriteText(px[0]+100, 80, text, 14, 0);
 
 		memset(text, 0, 20);
 		temp = (float)sfxVolume*product;
-		itoa(temp, text, 10);
+		sprintf(text, "%d", temp);
 		WriteText(px[1]+100, 90, text, 14, 0);
 		
 
 		SlideChange = false;
 		if(SlideIn){
-			for(i = 0; i <= 4; i++){
+			for(int i = 0; i <= 4; i++){
 				if(px[i] > 200){
 					px[i] -= (8-i)<<1;
 					SlideChange = true;
@@ -12627,7 +12552,7 @@ void mnuSound()
 			}
 		}
 		else if(SlideOut){
-			for(i = 0; i <= 4; i++){
+			for(int i = 0; i <= 4; i++){
 				if(px[i] < 400){
 					px[i] += (i+4)<<1;
 					SlideChange = true;
@@ -12649,7 +12574,7 @@ void mnuSound()
 				//break;
 				if(ResetSlide){
 					px[0] = 340;
-					for(i = 1; i <= 4; i++) px[i] = 340+i*20;
+					for(int i = 1; i <= 4; i++) px[i] = 340+i*20;
 					SlideIn = true;
 					ResetSlide = false;
 				}				
@@ -12677,35 +12602,37 @@ void mnuSound()
 		if(Active){
 		//- Process the input
 			PlaySound = false;
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
+			Keyboard = SDL_GetKeyboardState(0);
+#if 0
 			if(WinApp.JoyStickEnabled){
 				WinApp.lpdijoy[JoyOne]->Poll();
 				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 			}
+#endif
 
-			if(Keyboard[DIK_ESCAPE]) SlideOut = true;
+			if(Keyboard[SDL_SCANCODE_ESCAPE]) SlideOut = true;
 			
 			HoldTimer--;
 			if(HoldTimer <= 0) HoldTimer = 0;
 			if(HoldTimer <= 0){
 				
-				if(Keyboard[DIK_SPACE] || Keyboard[DIK_LCONTROL] || Keyboard[DIK_RETURN] || JoyState.rgbButtons[0]) SlideOut = true;
+				if(Keyboard[SDL_SCANCODE_SPACE] || Keyboard[SDL_SCANCODE_LCTRL] || Keyboard[SDL_SCANCODE_RETURN] || JoyState.rgbButtons[0]) SlideOut = true;
 				
-				if(Keyboard[DIK_DOWN] || JoyState.lY > dpad){
+				if(Keyboard[SDL_SCANCODE_DOWN] || JoyState.lY > dpad){
 					Col[Arrow] = 15;
 					Arrow += 1;
 					HoldTimer = HoldDelay;
 					if(Arrow > 2) Arrow = 2; else PlaySound = true;
 					Col[Arrow] = 40;					
 				}
-				if(Keyboard[DIK_UP] || JoyState.lY < -dpad){
+				if(Keyboard[SDL_SCANCODE_UP] || JoyState.lY < -dpad){
 					Col[Arrow] = 15;
 					Arrow -= 1;
 					HoldTimer = HoldDelay;
 					if(Arrow < 0) Arrow = 0; else PlaySound = true;
 					Col[Arrow] = 40;					
 				}
-				if(Keyboard[DIK_RIGHT] || JoyState.lX > dpad){
+				if(Keyboard[SDL_SCANCODE_RIGHT] || JoyState.lX > dpad){
 					if(Arrow == 0) maxMusicVolume += 32;
 					if(Arrow == 1) sfxVolume += 32;
 					if(maxMusicVolume > 255) maxMusicVolume = 255;
@@ -12715,7 +12642,7 @@ void mnuSound()
 					PlaySound = true;
 					HoldTimer = HoldDelay;
 				}
-				if(Keyboard[DIK_LEFT] || JoyState.lX < -dpad){
+				if(Keyboard[SDL_SCANCODE_LEFT] || JoyState.lX < -dpad){
 					if(Arrow == 0) maxMusicVolume -= 32;
 					if(Arrow == 1) sfxVolume -= 32;
 					if(maxMusicVolume < 0) maxMusicVolume = 0;
@@ -12756,12 +12683,11 @@ void mnuCredits()
 
 	while(NO_ONE_CARES)
 	{
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if(SDL_PollEvent(&msg))
 		{
-			if(msg.message == WM_QUIT)
+			if(msg.type == SDL_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			WindowProc(&msg);
 		}
 		
 		LD3.DrawSky(&WinApp, xShift, 0);
@@ -12786,7 +12712,7 @@ void mnuCredits()
 
 		SlideChange = false;
 		if(SlideIn){
-			for(i = 0; i <= 9; i++){
+			for(int i = 0; i <= 9; i++){
 				if(px[i] > 60){
 					px[i] -= (14-i)<<1;
 					SlideChange = true;
@@ -12795,7 +12721,7 @@ void mnuCredits()
 			}
 		}
 		else if(SlideOut){
-			for(i = 0; i <= 9; i++){
+			for(int i = 0; i <= 9; i++){
 				if(px[i] < 360){
 					px[i] += (i+4)<<1;
 					SlideChange = true;
@@ -12835,18 +12761,20 @@ void mnuCredits()
 
 		if(Active){
 		//- Process the input
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
+			Keyboard = SDL_GetKeyboardState(0);
+#if 0
 			if(WinApp.JoyStickEnabled){
 				WinApp.lpdijoy[JoyOne]->Poll();
 				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 			}
+#endif
 
 			HoldTimer--;
 			PlaySound = false;
 			if(HoldTimer <= 0) HoldTimer = 0;
 			if(HoldTimer <= 0){
-				if(Keyboard[DIK_ESCAPE]) SlideOut = true;
-				if(Keyboard[DIK_SPACE] || Keyboard[DIK_LCONTROL] || Keyboard[DIK_RETURN] || JoyState.rgbButtons[0]) SlideOut = true;				
+				if(Keyboard[SDL_SCANCODE_ESCAPE]) SlideOut = true;
+				if(Keyboard[SDL_SCANCODE_SPACE] || Keyboard[SDL_SCANCODE_LCTRL] || Keyboard[SDL_SCANCODE_RETURN] || JoyState.rgbButtons[0]) SlideOut = true;				
 			}
 
 			if(PlaySound) FSOUND_PlaySound(FSOUND_FREE,sndItemPickup);			
@@ -12874,11 +12802,12 @@ void mnuCredits2()
 	LD3.LoadTileSet(&WinApp, TileSetFilename, 0);
 	LD3.LoadPalette(&WinApp, PaletteFilename);
 
-	memcpy(FadePalette, WinApp.palette, sizeof(PALETTEENTRY)*256);
+	memcpy(FadePalette, WinApp.palette, sizeof(SDL_Color)*256);
 	
-	WinApp.lpddpal->Release();
-	WinApp.lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, FadePalette, &WinApp.lpddpal, NULL);
-	WinApp.lpddsprimary->SetPalette(WinApp.lpddpal);
+	SDL_FreePalette(WinApp.lpddpal);
+	WinApp.lpddpal = SDL_AllocPalette(256);
+	SDL_SetPaletteColors(WinApp.lpddpal, FadePalette, 0, 256);
+	SDL_SetSurfacePalette(WinApp.lpddsback, WinApp.lpddpal);
 	
 
 	memset(Credits, 0, 8000);
@@ -12985,12 +12914,11 @@ void mnuCredits2()
 	
 	while(NO_ONE_CARES)
 	{
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if(SDL_PollEvent(&msg))
 		{
-			if(msg.message == WM_QUIT)
+			if(msg.type == SDL_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			WindowProc(&msg);
 		}
 		
 		LD3.ClearBuffer(&WinApp, 0);
@@ -13021,13 +12949,15 @@ void mnuCredits2()
 
 		if(Active){
 		//- Process the input
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
+			Keyboard = SDL_GetKeyboardState(0);
+#if 0
 			if(WinApp.JoyStickEnabled){
 				WinApp.lpdijoy[JoyOne]->Poll();
 				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 			}
+#endif
 
-			if(Keyboard[DIK_ESCAPE]) break;		
+			if(Keyboard[SDL_SCANCODE_ESCAPE]) break;		
 		}
 
 		LD3.FlipSurfaces(&WinApp);
@@ -13064,53 +12994,54 @@ void mnuControls()
 	KeyMsg = (char*)calloc(4000, sizeof(char));
 	JoyMsg = (char*)calloc(200, sizeof(char));
 
-	strcpy(&KeyMsg[DIK_A<<4], "A");	strcpy(&KeyMsg[DIK_B<<4], "B");	strcpy(&KeyMsg[DIK_C<<4], "C");	strcpy(&KeyMsg[DIK_D<<4], "D");
-	strcpy(&KeyMsg[DIK_E<<4], "E");	strcpy(&KeyMsg[DIK_F<<4], "F");	strcpy(&KeyMsg[DIK_G<<4], "G");	strcpy(&KeyMsg[DIK_H<<4], "H");
-	strcpy(&KeyMsg[DIK_I<<4], "I");	strcpy(&KeyMsg[DIK_J<<4], "J");	strcpy(&KeyMsg[DIK_K<<4], "K");	strcpy(&KeyMsg[DIK_L<<4], "L");
-	strcpy(&KeyMsg[DIK_M<<4], "M");	strcpy(&KeyMsg[DIK_N<<4], "N");	strcpy(&KeyMsg[DIK_O<<4], "O");	strcpy(&KeyMsg[DIK_P<<4], "P");
-	strcpy(&KeyMsg[DIK_Q<<4], "Q");	strcpy(&KeyMsg[DIK_R<<4], "R");	strcpy(&KeyMsg[DIK_S<<4], "S");	strcpy(&KeyMsg[DIK_T<<4], "T");
-	strcpy(&KeyMsg[DIK_U<<4], "U");	strcpy(&KeyMsg[DIK_V<<4], "V");	strcpy(&KeyMsg[DIK_W<<4], "W");	strcpy(&KeyMsg[DIK_X<<4], "X");
-	strcpy(&KeyMsg[DIK_Y<<4], "Y");	strcpy(&KeyMsg[DIK_Z<<4], "Z");
-	strcpy(&KeyMsg[DIK_1<<4], "1");	strcpy(&KeyMsg[DIK_2<<4], "2");	strcpy(&KeyMsg[DIK_3<<4], "3");	strcpy(&KeyMsg[DIK_4<<4], "4");
-	strcpy(&KeyMsg[DIK_5<<4], "5");	strcpy(&KeyMsg[DIK_6<<4], "6");	strcpy(&KeyMsg[DIK_7<<4], "7");	strcpy(&KeyMsg[DIK_8<<4], "8");
-	strcpy(&KeyMsg[DIK_9<<4], "9");	strcpy(&KeyMsg[DIK_0<<4], "0");	strcpy(&KeyMsg[DIK_MINUS<<4], "-");strcpy(&KeyMsg[DIK_EQUALS<<4], "=");
-	strcpy(&KeyMsg[DIK_NUMPAD1<<4], "NUMPAD 1");	strcpy(&KeyMsg[DIK_NUMPAD2<<4], "NUMPAD 2");	strcpy(&KeyMsg[DIK_NUMPAD3<<4], "NUMPAD 3");
-	strcpy(&KeyMsg[DIK_NUMPAD4<<4], "NUMPAD 4");	strcpy(&KeyMsg[DIK_NUMPAD5<<4], "NUMPAD 5");	strcpy(&KeyMsg[DIK_NUMPAD6<<4], "NUMPAD 6");
-	strcpy(&KeyMsg[DIK_NUMPAD7<<4], "NUMPAD 7");	strcpy(&KeyMsg[DIK_NUMPAD8<<4], "NUMPAD 8");	strcpy(&KeyMsg[DIK_NUMPAD9<<4], "NUMPAD 9");
-	strcpy(&KeyMsg[DIK_NUMPAD0<<4], "NUMPAD 0");
-	strcpy(&KeyMsg[DIK_TAB<<4], "TAB");
-	strcpy(&KeyMsg[DIK_BACK<<4], "BACKSPACE");
-	strcpy(&KeyMsg[DIK_RETURN<<4], "ENTER");
-	strcpy(&KeyMsg[DIK_LBRACKET<<4], "[");				strcpy(&KeyMsg[DIK_RBRACKET<<4], "]");	
-	strcpy(&KeyMsg[DIK_LCONTROL<<4], "LEFT CONTROL");	strcpy(&KeyMsg[DIK_RCONTROL<<4], "RIGHT CONTROL");
-	strcpy(&KeyMsg[DIK_LALT<<4], "LEFT ALT");			strcpy(&KeyMsg[DIK_RALT<<4], "RIGHT ALT");
-	strcpy(&KeyMsg[DIK_LSHIFT<<4], "LEFT SHIFT");		strcpy(&KeyMsg[DIK_RSHIFT<<4], "RIGHT SHIFT");
-	strcpy(&KeyMsg[DIK_SEMICOLON<<4], ";");
-	strcpy(&KeyMsg[DIK_APOSTROPHE<<4], "'");
-	strcpy(&KeyMsg[DIK_GRAVE<<4], "`");
-	strcpy(&KeyMsg[DIK_COMMA<<4], ",");
-	strcpy(&KeyMsg[DIK_PERIOD<<4], ".");
-	strcpy(&KeyMsg[DIK_SLASH<<4], "/");
-	strcpy(&KeyMsg[DIK_MULTIPLY<<4], "NUMPAD *");
-	strcpy(&KeyMsg[DIK_SPACE<<4], "SPACEBAR");
-	strcpy(&KeyMsg[DIK_CAPITAL<<4], "CAPS LOCK");
-	strcpy(&KeyMsg[DIK_NUMLOCK<<4], "NUMLOCK");
-	strcpy(&KeyMsg[DIK_SCROLL<<4], "SCROLL LOCK");
-	strcpy(&KeyMsg[DIK_SUBTRACT<<4], "NUMPAD -");
-	strcpy(&KeyMsg[DIK_ADD<<4], "NUMPAD +");
-	strcpy(&KeyMsg[DIK_DECIMAL<<4], "NUMPAD .");
-	strcpy(&KeyMsg[DIK_NUMPADENTER<<4], "NUMPAD ENTER");
-	strcpy(&KeyMsg[DIK_NUMPADCOMMA<<4], "NUMPAD COMMA");
-	strcpy(&KeyMsg[DIK_DIVIDE<<4], "NUMPAD /");
-	strcpy(&KeyMsg[DIK_SYSRQ<<4], "SYSRQ");
-	strcpy(&KeyMsg[DIK_HOME<<4], "HOME");
-	strcpy(&KeyMsg[DIK_END<<4], "END");
-	strcpy(&KeyMsg[DIK_PRIOR<<4], "PAGE UP");
-	strcpy(&KeyMsg[DIK_NEXT<<4], "PAGE DOWN");
-	strcpy(&KeyMsg[DIK_UP<<4], "UP ARROW");		strcpy(&KeyMsg[DIK_DOWN<<4], "DOWN ARROW");
-	strcpy(&KeyMsg[DIK_LEFT<<4], "LEFT ARROW");	strcpy(&KeyMsg[DIK_RIGHT<<4], "RIGHT ARROW");
-	strcpy(&KeyMsg[DIK_INSERT<<4], "INSERT");
-	strcpy(&KeyMsg[DIK_DELETE<<4], "DELETE");	
+	// TODO(davidgow): SDL has the SDL_GetScancodeName() function which could replace all of this!
+	strcpy(&KeyMsg[SDL_SCANCODE_A<<4], "A");	strcpy(&KeyMsg[SDL_SCANCODE_B<<4], "B");	strcpy(&KeyMsg[SDL_SCANCODE_C<<4], "C");	strcpy(&KeyMsg[SDL_SCANCODE_D<<4], "D");
+	strcpy(&KeyMsg[SDL_SCANCODE_E<<4], "E");	strcpy(&KeyMsg[SDL_SCANCODE_F<<4], "F");	strcpy(&KeyMsg[SDL_SCANCODE_G<<4], "G");	strcpy(&KeyMsg[SDL_SCANCODE_H<<4], "H");
+	strcpy(&KeyMsg[SDL_SCANCODE_I<<4], "I");	strcpy(&KeyMsg[SDL_SCANCODE_J<<4], "J");	strcpy(&KeyMsg[SDL_SCANCODE_K<<4], "K");	strcpy(&KeyMsg[SDL_SCANCODE_L<<4], "L");
+	strcpy(&KeyMsg[SDL_SCANCODE_M<<4], "M");	strcpy(&KeyMsg[SDL_SCANCODE_N<<4], "N");	strcpy(&KeyMsg[SDL_SCANCODE_O<<4], "O");	strcpy(&KeyMsg[SDL_SCANCODE_P<<4], "P");
+	strcpy(&KeyMsg[SDL_SCANCODE_Q<<4], "Q");	strcpy(&KeyMsg[SDL_SCANCODE_R<<4], "R");	strcpy(&KeyMsg[SDL_SCANCODE_S<<4], "S");	strcpy(&KeyMsg[SDL_SCANCODE_T<<4], "T");
+	strcpy(&KeyMsg[SDL_SCANCODE_U<<4], "U");	strcpy(&KeyMsg[SDL_SCANCODE_V<<4], "V");	strcpy(&KeyMsg[SDL_SCANCODE_W<<4], "W");	strcpy(&KeyMsg[SDL_SCANCODE_X<<4], "X");
+	strcpy(&KeyMsg[SDL_SCANCODE_Y<<4], "Y");	strcpy(&KeyMsg[SDL_SCANCODE_Z<<4], "Z");
+	strcpy(&KeyMsg[SDL_SCANCODE_1<<4], "1");	strcpy(&KeyMsg[SDL_SCANCODE_2<<4], "2");	strcpy(&KeyMsg[SDL_SCANCODE_3<<4], "3");	strcpy(&KeyMsg[SDL_SCANCODE_4<<4], "4");
+	strcpy(&KeyMsg[SDL_SCANCODE_5<<4], "5");	strcpy(&KeyMsg[SDL_SCANCODE_6<<4], "6");	strcpy(&KeyMsg[SDL_SCANCODE_7<<4], "7");	strcpy(&KeyMsg[SDL_SCANCODE_8<<4], "8");
+	strcpy(&KeyMsg[SDL_SCANCODE_9<<4], "9");	strcpy(&KeyMsg[SDL_SCANCODE_0<<4], "0");	strcpy(&KeyMsg[SDL_SCANCODE_MINUS<<4], "-");strcpy(&KeyMsg[SDL_SCANCODE_EQUALS<<4], "=");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_1<<4], "NUMPAD 1");	strcpy(&KeyMsg[SDL_SCANCODE_KP_2<<4], "NUMPAD 2");	strcpy(&KeyMsg[SDL_SCANCODE_KP_3<<4], "NUMPAD 3");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_4<<4], "NUMPAD 4");	strcpy(&KeyMsg[SDL_SCANCODE_KP_5<<4], "NUMPAD 5");	strcpy(&KeyMsg[SDL_SCANCODE_KP_6<<4], "NUMPAD 6");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_7<<4], "NUMPAD 7");	strcpy(&KeyMsg[SDL_SCANCODE_KP_8<<4], "NUMPAD 8");	strcpy(&KeyMsg[SDL_SCANCODE_KP_9<<4], "NUMPAD 9");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_0<<4], "NUMPAD 0");
+	strcpy(&KeyMsg[SDL_SCANCODE_TAB<<4], "TAB");
+	strcpy(&KeyMsg[SDL_SCANCODE_BACKSPACE<<4], "BACKSPACE");
+	strcpy(&KeyMsg[SDL_SCANCODE_RETURN<<4], "ENTER");
+	strcpy(&KeyMsg[SDL_SCANCODE_LEFTBRACKET<<4], "[");				strcpy(&KeyMsg[SDL_SCANCODE_RIGHTBRACKET<<4], "]");	
+	strcpy(&KeyMsg[SDL_SCANCODE_LCTRL<<4], "LEFT CONTROL");	strcpy(&KeyMsg[SDL_SCANCODE_RCTRL<<4], "RIGHT CONTROL");
+	strcpy(&KeyMsg[SDL_SCANCODE_LALT<<4], "LEFT ALT");			strcpy(&KeyMsg[SDL_SCANCODE_RALT<<4], "RIGHT ALT");
+	strcpy(&KeyMsg[SDL_SCANCODE_LSHIFT<<4], "LEFT SHIFT");		strcpy(&KeyMsg[SDL_SCANCODE_RSHIFT<<4], "RIGHT SHIFT");
+	strcpy(&KeyMsg[SDL_SCANCODE_SEMICOLON<<4], ";");
+	strcpy(&KeyMsg[SDL_SCANCODE_APOSTROPHE<<4], "'");
+	strcpy(&KeyMsg[SDL_SCANCODE_GRAVE<<4], "`");
+	strcpy(&KeyMsg[SDL_SCANCODE_COMMA<<4], ",");
+	strcpy(&KeyMsg[SDL_SCANCODE_PERIOD<<4], ".");
+	strcpy(&KeyMsg[SDL_SCANCODE_SLASH<<4], "/");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_MULTIPLY<<4], "NUMPAD *");
+	strcpy(&KeyMsg[SDL_SCANCODE_SPACE<<4], "SPACEBAR");
+	strcpy(&KeyMsg[SDL_SCANCODE_CAPSLOCK<<4], "CAPS LOCK");
+	strcpy(&KeyMsg[SDL_SCANCODE_NUMLOCKCLEAR<<4], "NUMLOCK");
+	strcpy(&KeyMsg[SDL_SCANCODE_SCROLLLOCK<<4], "SCROLL LOCK");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_MINUS<<4], "NUMPAD -");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_PLUS<<4], "NUMPAD +");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_DECIMAL<<4], "NUMPAD .");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_ENTER<<4], "NUMPAD ENTER");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_COMMA<<4], "NUMPAD COMMA");
+	strcpy(&KeyMsg[SDL_SCANCODE_KP_DIVIDE<<4], "NUMPAD /");
+	strcpy(&KeyMsg[SDL_SCANCODE_SYSREQ<<4], "SYSRQ");
+	strcpy(&KeyMsg[SDL_SCANCODE_HOME<<4], "HOME");
+	strcpy(&KeyMsg[SDL_SCANCODE_END<<4], "END");
+	strcpy(&KeyMsg[SDL_SCANCODE_PAGEUP<<4], "PAGE UP");
+	strcpy(&KeyMsg[SDL_SCANCODE_PAGEDOWN<<4], "PAGE DOWN");
+	strcpy(&KeyMsg[SDL_SCANCODE_UP<<4], "UP ARROW");		strcpy(&KeyMsg[SDL_SCANCODE_DOWN<<4], "DOWN ARROW");
+	strcpy(&KeyMsg[SDL_SCANCODE_LEFT<<4], "LEFT ARROW");	strcpy(&KeyMsg[SDL_SCANCODE_RIGHT<<4], "RIGHT ARROW");
+	strcpy(&KeyMsg[SDL_SCANCODE_INSERT<<4], "INSERT");
+	strcpy(&KeyMsg[SDL_SCANCODE_DELETE<<4], "DELETE");	
 	strcpy(&KeyMsg[0], "UNDEFINED");	
 	
 	strcpy(&JoyMsg[0<<4],  "BUTTON 0");
@@ -13131,12 +13062,11 @@ void mnuControls()
 
 	while(NO_ONE_CARES)
 	{
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if(SDL_PollEvent(&msg))
 		{
-			if(msg.message == WM_QUIT)
+			if(msg.type == SDL_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			WindowProc(&msg);
 		}
 		
 		LD3.DrawSky(&WinApp, xShift, 0);
@@ -13182,7 +13112,12 @@ void mnuControls()
 		LD3.DrawBox(&WinApp, 0, 120, xRes-1, 120, 15, false);
 		
 		memset(InputDevice, 0, 80);
+#if 0
+		//TODO(davidgow): Joystick name (SDL supports getting these for Gamepads, at least)
 		strcpy(InputDevice, (char *)&WinApp.joyname[JoyOne*80]);
+#else
+		strcpy(InputDevice, "[TODO: Joysticks]");
+#endif
 		WriteText(0, 130, InputDevice, 15, DT_CENTER);
 
 		//WriteText(120, 140,  "PLAYER 1", 15, 0);	WriteText(220, 140,  "PLAYER2", 15, 0);
@@ -13202,7 +13137,7 @@ void mnuControls()
 			WriteText(120, 190, &JoyMsg[joyNoFlip<<4], 7, 0); //WriteText(220, 190, &JoyMsg[joyNoFlip2<<4], 7, 0);
 			WriteText(120, 200, &JoyMsg[joyNoMove<<4], 7, 0); //WriteText(220, 200, &JoyMsg[joyNoMove2<<4], 7, 0);
 			memset(Sensitivity, 0, 4);
-			itoa(int(dpad), Sensitivity, 10);
+			sprintf(Sensitivity, "%d", (int)dpad);
 			WriteText(120, 210, Sensitivity, 7, 0);
 		}
 
@@ -13230,13 +13165,15 @@ void mnuControls()
 
 		if(Active){
 		//- Process the input
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
+			Keyboard = SDL_GetKeyboardState(0);
+#if 0
 			if(WinApp.JoyStickEnabled){
 				WinApp.lpdijoy[JoyOne]->Poll();
 				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 			}
+#endif
 
-			if(Keyboard[DIK_ESCAPE]){
+			if(Keyboard[SDL_SCANCODE_ESCAPE]){
 
 				ofstream sfile;
 
@@ -13273,7 +13210,7 @@ void mnuControls()
 			if(HoldTimer <= 0){
 				
 				if(ArrowY <= 90){
-					if(Keyboard[DIK_UP] == 0 && Keyboard[DIK_DOWN] == 0 && Keyboard[DIK_LEFT] == 0 && Keyboard[DIK_RIGHT] == 0){
+					if(Keyboard[SDL_SCANCODE_UP] == 0 && Keyboard[SDL_SCANCODE_DOWN] == 0 && Keyboard[SDL_SCANCODE_LEFT] == 0 && Keyboard[SDL_SCANCODE_RIGHT] == 0){
 						for(int ky = 1; ky <= 255; ky++){						
 							if(Keyboard[ky] && strcmp(&KeyMsg[ky<<4], "") != 0){
 								*KeyPtr[(ArrowX-120)/100][(ArrowY-40)/10] = ky;
@@ -13294,7 +13231,7 @@ void mnuControls()
 					}
 				}
 				
-				if(Keyboard[DIK_DOWN] || JoyState.lY > dpad){
+				if(Keyboard[SDL_SCANCODE_DOWN] || JoyState.lY > dpad){
 					ArrowY += 10;
 					HoldTimer = HoldDelay;
 					if(ArrowY > 170 && WinApp.NumJoys > 0)
@@ -13307,7 +13244,7 @@ void mnuControls()
 
 					if(ArrowY > 100 && ArrowX > 120) ArrowX = 120;
 				}
-				if(Keyboard[DIK_UP] || JoyState.lY < -dpad){
+				if(Keyboard[SDL_SCANCODE_UP] || JoyState.lY < -dpad){
 					ArrowY -= 10;
 					HoldTimer = HoldDelay;
 					if(ArrowY < 40)
@@ -13315,7 +13252,7 @@ void mnuControls()
 					else
 						PlaySound = true;
 				}
-				if(Keyboard[DIK_LEFT] || JoyState.lX < -dpad){
+				if(Keyboard[SDL_SCANCODE_LEFT] || JoyState.lX < -dpad){
 					if(ArrowY == 170){
 						dpad -= 1;
 						if(dpad < 1) dpad = 1;
@@ -13336,7 +13273,7 @@ void mnuControls()
 					}
 					HoldTimer = HoldDelay;
 				}
-				if(Keyboard[DIK_RIGHT] || JoyState.lX > dpad){
+				if(Keyboard[SDL_SCANCODE_RIGHT] || JoyState.lX > dpad){
 					if(ArrowY == 170){
 						dpad += 1;
 						if(dpad > 9) dpad = 9;
@@ -13412,11 +13349,7 @@ bool mnuChooseSlot(bool Loading)
 	for(int i = 0; i <= 9; i++){
 		
 		memset(Filename, 0, 80);
-		memset(Word, 0, 20);
-		strcpy(Filename, "save/slot");
-		itoa(i, Word, 10);
-		strcat(Filename, Word);
-		strcat(Filename, ".txt");		
+		sprintf(Filename, "save/slot%d.txt", i);
 
 		sfile.open(Filename, ios::binary);
 		
@@ -13424,7 +13357,7 @@ bool mnuChooseSlot(bool Loading)
 			{
 				memset(Word, 0, 20);
 				
-				ReadWord(&sfile, Word); strupr(Word);
+				ReadWord(&sfile, Word); SDL_strupr(Word);
 
 				if(strcmp(Word, "LEVEL") == 0)			SaveData[i].Level	= ReadValue(&sfile);
 				if(strcmp(Word, "LIVES") == 0)			SaveData[i].Lives	= ReadValue(&sfile);
@@ -13450,12 +13383,11 @@ bool mnuChooseSlot(bool Loading)
 
 	while(NO_ONE_CARES)
 	{
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if(SDL_PollEvent(&msg))
 		{
-			if(msg.message == WM_QUIT)
+			if(msg.type == SDL_QUIT)
 				break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			WindowProc(&msg);
 		}
 		
 		LD3.DrawSky(&WinApp, xShift, 0);
@@ -13479,24 +13411,24 @@ bool mnuChooseSlot(bool Loading)
 				LD3.PutSprite(&WinApp, 19, top+4, 0, 9, false);
 				
 				memset(Word, 0, 20); memset(Desc, 0, 40);
-				strcpy(Desc, "LEVEL ");	itoa(SaveData[i].Level, Word, 10); strcat(Desc, Word);
+				sprintf(Desc, "LEVEL %d", SaveData[i].Level);
 				//LD3.WriteText(&WinApp, 85, top, Desc, false, 15, true);
 				WriteText(85, top, Desc, 15, 0);
 
 				memset(Word, 0, 20); memset(Desc, 0, 40);
-				strcpy(Desc, "LIVES ");	itoa(SaveData[i].Lives, Word, 10); strcat(Desc, Word);
+				sprintf(Desc, "LIVES %d", SaveData[i].Lives);
 				//LD3.WriteText(&WinApp, 85, top+10, Desc, false, 15, true);
 				WriteText(85, top+10, Desc, 15, 0);
 
 				LD3.PutSprite(&WinApp, 140, top-15, -1, miBoxOfShells, false);
 				memset(Word, 0, 20); memset(Desc, 0, 40);
-				strcpy(Desc, "X");	itoa(SaveData[i].Shells, Word, 10); strcat(Desc, Word);
+				sprintf(Desc, "X%d", SaveData[i].Shells);
 				//LD3.WriteText(&WinApp, 158, top, Desc, false, 15, true);
 				WriteText(158, top, Desc, 15, 0);
 				
 				LD3.PutSprite(&WinApp, 180, top-14, -1, miGrenade, false);
 				memset(Word, 0, 20); memset(Desc, 0, 40);
-				strcpy(Desc, "X");	itoa(SaveData[i].Grenades, Word, 10); strcat(Desc, Word);
+				sprintf(Desc, "X%d", SaveData[i].Grenades);
 				//LD3.WriteText(&WinApp, 195, top, Desc, false, 15, true);
 				WriteText(195, top, Desc, 15, 0);
 				
@@ -13573,16 +13505,18 @@ bool mnuChooseSlot(bool Loading)
 
 		if(Active){
 		//- Process the input
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
+			Keyboard = SDL_GetKeyboardState(0);
+#if 0
 			if(WinApp.JoyStickEnabled){
 				WinApp.lpdijoy[JoyOne]->Poll();
 				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 			}
+#endif
 
 			HoldTimer--;
 			if(HoldTimer <= 0) HoldTimer = 0;
 			if(HoldTimer <= 0){
-				if(Keyboard[DIK_SPACE] || Keyboard[DIK_LCONTROL] || Keyboard[DIK_RETURN] || JoyState.rgbButtons[0]){
+				if(Keyboard[SDL_SCANCODE_SPACE] || Keyboard[SDL_SCANCODE_LCTRL] || Keyboard[SDL_SCANCODE_RETURN] || JoyState.rgbButtons[0]){
 					if(AskSure){
 						if(Arrow == 100){
 							FSOUND_PlaySound(FSOUND_FREE, diescum);
@@ -13648,15 +13582,15 @@ bool mnuChooseSlot(bool Loading)
 					}
 				}
 
-				if(Keyboard[DIK_ESCAPE] || JoyState.rgbButtons[3]) break;			
+				if(Keyboard[SDL_SCANCODE_ESCAPE] || JoyState.rgbButtons[3]) break;			
 							
 				if(AskSure){
-					if(Keyboard[DIK_DOWN] || JoyState.lY > dpad){
+					if(Keyboard[SDL_SCANCODE_DOWN] || JoyState.lY > dpad){
 						Arrow += 20;
 						HoldTimer = HoldDelay;						
 						PlaySound = true;
 					}
-					if(Keyboard[DIK_UP] || JoyState.lY < -dpad){
+					if(Keyboard[SDL_SCANCODE_UP] || JoyState.lY < -dpad){
 						Arrow -= 20;
 						HoldTimer = HoldDelay;
 						PlaySound = true;
@@ -13672,13 +13606,13 @@ bool mnuChooseSlot(bool Loading)
 					}
 				}
 				else{
-					if(Keyboard[DIK_DOWN] || JoyState.lY > dpad){
+					if(Keyboard[SDL_SCANCODE_DOWN] || JoyState.lY > dpad){
 						Arrow += 35;
 						HoldTimer = HoldDelay;
 						//if(Arrow == 140) Arrow = 160;
 						PlaySound = true;
 					}
-					if(Keyboard[DIK_UP] || JoyState.lY < -dpad){
+					if(Keyboard[SDL_SCANCODE_UP] || JoyState.lY < -dpad){
 						Arrow -= 35;
 						HoldTimer = HoldDelay;
 						//if(Arrow == 140) Arrow = 120;
@@ -13721,47 +13655,43 @@ void SaveGame()
 	char Num[20];
 
 	memset(Filename, 0, 80);
-	memset(Word, 0, 20);
-	strcpy(Filename, "save/slot");
-	itoa(SlotNum, Word, 10);
-	strcat(Filename, Word);
-	strcat(Filename, ".txt");
+	sprintf(Filename, "save/slot%d.txt", SlotNum);
 
 	ofstream sfile;
 	sfile.open(Filename, ios::binary);
 	
 		memset(Word, 0, 20); memset(Num, 0, 20);
-		strcpy(Word, "Level "); itoa(Level, Num, 10); strcat(Word, Num);
+		sprintf(Word, "Level %d", Level);
 		PutString(&sfile, Word);
 
 		memset(Word, 0, 20); memset(Num, 0, 20);
-		strcpy(Word, "Lives "); itoa(Lives, Num, 10); strcat(Word, Num);
+		sprintf(Word, "Lives %d", Lives);
 		PutString(&sfile, Word);
 
 		memset(Word, 0, 20); memset(Num, 0, 20);
-		strcpy(Word, "Shotgun "); itoa(HasShotgun, Num, 10); strcat(Word, Num);
+		sprintf(Word, "Shotgun %d", HasShotgun);
 		PutString(&sfile, Word);
 		memset(Word, 0, 20); memset(Num, 0, 20);
-		strcpy(Word, "Machinegun "); itoa(HasMachinegun, Num, 10); strcat(Word, Num);
+		sprintf(Word, "Machinegun %d", HasMachinegun);
 		PutString(&sfile, Word);
 		memset(Word, 0, 20); memset(Num, 0, 20);
-		strcpy(Word, "Flamethrower "); itoa(HasFlamethrower, Num, 10); strcat(Word, Num);
+		sprintf(Word, "Flamethrower %d", HasFlamethrower);
 		PutString(&sfile, Word);
 		memset(Word, 0, 20); memset(Num, 0, 20);
-		strcpy(Word, "Bazooka "); itoa(HasBazooka, Num, 10); strcat(Word, Num);
+		sprintf(Word, "Bazooka %d", HasBazooka);
 		PutString(&sfile, Word);
 
 		memset(Word, 0, 20); memset(Num, 0, 20);
-		strcpy(Word, "Shells "); itoa(Shells, Num, 10); strcat(Word, Num);
+		sprintf(Word, "Shells %d", Shells);
 		PutString(&sfile, Word);
 		memset(Word, 0, 20); memset(Num, 0, 20);
-		strcpy(Word, "Bullets "); itoa(Bullets, Num, 10); strcat(Word, Num);
+		sprintf(Word, "Bullets %d", Bullets);
 		PutString(&sfile, Word);
 		memset(Word, 0, 20); memset(Num, 0, 20);
-		strcpy(Word, "Rockets "); itoa(Rockets, Num, 10); strcat(Word, Num);
+		sprintf(Word, "Rockets %d", Rockets);
 		PutString(&sfile, Word);
 		memset(Word, 0, 20); memset(Num, 0, 20);
-		strcpy(Word, "Grenades "); itoa(Grenades, Num, 10); strcat(Word, Num);
+		sprintf(Word, "Grenades %d", Grenades);
 		PutString(&sfile, Word);
 
 		memset(Word, 0, 20); strcpy(Word, "END");
@@ -13783,14 +13713,14 @@ void PutString(ofstream *File, char *Text)
 	}
 }
 
-void WriteBigFont(int x, int y, char *text)
+void WriteBigFont(int x, int y, const char *text)
 {
 	int length, fx;
 	char Text1[80];
 
 	memset(Text1, 0, 80);
 	strcpy(Text1, text);
-	strupr(Text1);
+	SDL_strupr(Text1);
 
 	length = strlen(Text1);
 	fx = x;
@@ -13819,11 +13749,12 @@ void Intro()
 	WinApp.CreatePalette();
 	WinApp.SetPalette();
 
-	memcpy(FadePalette, WinApp.palette, sizeof(PALETTEENTRY)*256);
+	memcpy(FadePalette, WinApp.palette, sizeof(SDL_Color)*256);
 	
-	WinApp.lpddpal->Release();
-	WinApp.lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, FadePalette, &WinApp.lpddpal, NULL);
-	WinApp.lpddsprimary->SetPalette(WinApp.lpddpal);
+	SDL_FreePalette(WinApp.lpddpal);
+	WinApp.lpddpal = SDL_AllocPalette(256);
+	SDL_SetPaletteColors(WinApp.lpddpal, FadePalette, 0, 256);
+	SDL_SetSurfacePalette(WinApp.lpddsback, WinApp.lpddpal);
 
 	Intro1();
 	//Intro2();
@@ -13954,39 +13885,41 @@ bool FadeScreenToBlack()
 	bool state = false;
 	bool onGamepad = true;
 
-	PALETTEENTRY blackpal[256];
-	memset(blackpal, 0, sizeof(PALETTEENTRY)*256);
+	SDL_Color blackpal[256];
+	memset(blackpal, 0, sizeof(SDL_Color)*256);
 
 	while(PaletteChange == true){
 		PaletteChange = false;
-		WinApp.lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
+		LD3.FlipSurfaces(&WinApp);
 		for(int n = 0; n <= 255; n++){
-			red = (int)FadePalette[n].peRed;
-			grn = (int)FadePalette[n].peGreen;
-			blu = (int)FadePalette[n].peBlue;
+			red = (int)FadePalette[n].r;
+			grn = (int)FadePalette[n].g;
+			blu = (int)FadePalette[n].b;
 			if(red > 0) {red -= FADE_SPEED; PaletteChange = true;}
 			if(grn > 0) {grn -= FADE_SPEED; PaletteChange = true;}
 			if(blu > 0) {blu -= FADE_SPEED; PaletteChange = true;}
 			if(red < 0) red = 0;
 			if(grn < 0) grn = 0;
 			if(blu < 0) blu = 0;
-			FadePalette[n].peRed   = (BYTE)red;
-			FadePalette[n].peGreen = (BYTE)grn;
-			FadePalette[n].peBlue  = (BYTE)blu;
+			FadePalette[n].r   = (BYTE)red;
+			FadePalette[n].g = (BYTE)grn;
+			FadePalette[n].b  = (BYTE)blu;
 		}
-		WinApp.lpddpal->SetEntries(0, 0, 256, FadePalette);
+		SDL_SetPaletteColors(WinApp.lpddpal, FadePalette, 0, 256);
 		//------------------------------------------------
 		//- Read the input from the keyboard and gamepad
 		//------------------------------------------------
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
+			Keyboard = SDL_GetKeyboardState(0);
+#if 0
 			if(WinApp.JoyStickEnabled){
 				WinApp.lpdijoy[JoyOne]->Poll();
 				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
 			}
+#endif
 		//------------------------------------------------
 		//- End reading input
 		//------------------------------------------------
-			if(Keyboard[DIK_SPACE] || Keyboard[DIK_ESCAPE] || Keyboard[keyJump] || Keyboard[keyShoot]) {state = true; break;}
+			if(Keyboard[SDL_SCANCODE_SPACE] || Keyboard[SDL_SCANCODE_ESCAPE] || Keyboard[keyJump] || Keyboard[keyShoot]) {state = true; break;}
 			if(JoyState.rgbButtons[0] || JoyState.rgbButtons[1] || JoyState.rgbButtons[2] || JoyState.rgbButtons[3]){
 				if(onGamepad == false){
 					state = true;
@@ -14000,7 +13933,7 @@ bool FadeScreenToBlack()
 	if(state){
 		LD3.ClearBuffer(&WinApp, 0); LD3.FlipSurfaces(&WinApp);
 		LD3.ClearBuffer(&WinApp, 0); LD3.FlipSurfaces(&WinApp);
-		WinApp.lpddpal->SetEntries(0, 0, 256, blackpal);
+		SDL_SetPaletteColors(WinApp.lpddpal, blackpal, 0, 256);
 	}
 	return(state);
 }
@@ -14013,40 +13946,37 @@ bool FadeScreenOutOfBlack()
 	
 	while(PaletteChange == true){
 		PaletteChange = false;
-		WinApp.lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
 		for(int n = 0; n <= 255; n++){
-			red = (int)FadePalette[n].peRed;
-			grn = (int)FadePalette[n].peGreen;
-			blu = (int)FadePalette[n].peBlue;
-			if(red < WinApp.palette[n].peRed)   {red += FADE_SPEED; PaletteChange = true;}
-			if(grn < WinApp.palette[n].peGreen) {grn += FADE_SPEED; PaletteChange = true;}
-			if(blu < WinApp.palette[n].peBlue)  {blu += FADE_SPEED; PaletteChange = true;}
-			if(red > WinApp.palette[n].peRed)   red = WinApp.palette[n].peRed;
-			if(grn > WinApp.palette[n].peGreen) grn = WinApp.palette[n].peGreen;
-			if(blu > WinApp.palette[n].peBlue)  blu = WinApp.palette[n].peBlue;
-			FadePalette[n].peRed   = (BYTE)red;
-			FadePalette[n].peGreen = (BYTE)grn;
-			FadePalette[n].peBlue  = (BYTE)blu;
+			red = (int)FadePalette[n].r;
+			grn = (int)FadePalette[n].g;
+			blu = (int)FadePalette[n].b;
+			if(red < WinApp.palette[n].r)   {red += FADE_SPEED; PaletteChange = true;}
+			if(grn < WinApp.palette[n].g) {grn += FADE_SPEED; PaletteChange = true;}
+			if(blu < WinApp.palette[n].b)  {blu += FADE_SPEED; PaletteChange = true;}
+			if(red > WinApp.palette[n].r)   red = WinApp.palette[n].r;
+			if(grn > WinApp.palette[n].g) grn = WinApp.palette[n].g;
+			if(blu > WinApp.palette[n].b)  blu = WinApp.palette[n].b;
+			FadePalette[n].r   = (BYTE)red;
+			FadePalette[n].g = (BYTE)grn;
+			FadePalette[n].b  = (BYTE)blu;
 		}
-		WinApp.lpddpal->SetEntries(0, 0, 256, FadePalette);		
+		SDL_SetPaletteColors(WinApp.lpddpal, FadePalette, 0, 256);
+		LD3.FlipSurfaces(&WinApp);
 		//------------------------------------------------
 		//- Read the input from the keyboard and gamepad
 		//------------------------------------------------
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
-			if(WinApp.JoyStickEnabled){
-				WinApp.lpdijoy[JoyOne]->Poll();
-				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
-			}
+			Keyboard = SDL_GetKeyboardState(0);
+			// TODO(davidgow): This (and others) won't matter if we don't poll the events! Also joystick!
 		//------------------------------------------------
 		//- End reading input
 		//------------------------------------------------
-			if(Keyboard[DIK_SPACE] || Keyboard[DIK_ESCAPE] || Keyboard[keyJump] || Keyboard[keyShoot]) {state = true; break;}
+			if(Keyboard[SDL_SCANCODE_SPACE] || Keyboard[SDL_SCANCODE_ESCAPE] || Keyboard[keyJump] || Keyboard[keyShoot]) {state = true; break;}
 			if(JoyState.rgbButtons[0] || JoyState.rgbButtons[1] || JoyState.rgbButtons[2] || JoyState.rgbButtons[3]) {state = true; break;}
 	}
 	if(state){
 		LD3.ClearBuffer(&WinApp, 0); LD3.FlipSurfaces(&WinApp);
 		LD3.ClearBuffer(&WinApp, 0); LD3.FlipSurfaces(&WinApp);
-		WinApp.lpddpal->SetEntries(0, 0, 256, WinApp.palette);
+		SDL_SetPaletteColors(WinApp.lpddpal, WinApp.palette, 0, 256);
 	}
 	return(state);
 }
@@ -14055,20 +13985,17 @@ bool Wait(int seconds)
 {
 	bool state = false;
 	
+	// TODO(davidgow): Make this VSync & Refresh rate independent.
 	for(int n = 0; n <= seconds*75; n++){
-		WinApp.lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
+		LD3.FlipSurfaces(&WinApp);
 		//------------------------------------------------
 		//- Read the input from the keyboard and gamepad
 		//------------------------------------------------
-			WinApp.lpdikey->GetDeviceState(256, Keyboard);
-			if(WinApp.JoyStickEnabled){
-				WinApp.lpdijoy[JoyOne]->Poll();
-				WinApp.lpdijoy[JoyOne]->GetDeviceState(sizeof(DIJOYSTATE), (LPVOID)&JoyState);
-			}
+			Keyboard = SDL_GetKeyboardState(0);
 		//------------------------------------------------
 		//- End reading input
 		//------------------------------------------------
-			if(Keyboard[DIK_SPACE] || Keyboard[DIK_ESCAPE] || Keyboard[keyJump] || Keyboard[keyShoot]) {state = true; break;}
+			if(Keyboard[SDL_SCANCODE_SPACE] || Keyboard[SDL_SCANCODE_ESCAPE] || Keyboard[keyJump] || Keyboard[keyShoot]) {state = true; break;}
 			if(JoyState.rgbButtons[0] || JoyState.rgbButtons[1] || JoyState.rgbButtons[2] || JoyState.rgbButtons[3]) {state = true; break;}
 	}
 	if(state){

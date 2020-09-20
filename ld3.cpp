@@ -31,35 +31,35 @@ LD3ENGINE::~LD3ENGINE()
 	free(Map);
 }
 
-void LD3ENGINE::LoadPalette(WINAPP *WinApp, char* Filename)
+void LD3ENGINE::LoadPalette(WINAPP *WinApp, const char* Filename)
 {
 	//- Load the palette
 	//------------------
 
 	ifstream PalFile(Filename, ios::binary);
-	PALETTEENTRY	*palette;
+	SDL_Color	*palette;
 	char			ch;	
 	
 	palette = &WinApp->palette[0];
 	
 	for(int i = 0; i <= 255; i++)
 	{
-		PalFile.get(ch); palette[i].peRed	= ch*4;
-		PalFile.get(ch); palette[i].peGreen	= ch*4;
-		PalFile.get(ch); palette[i].peBlue	= ch*4;
+		PalFile.get(ch); palette[i].r	= ch*4;
+		PalFile.get(ch); palette[i].g	= ch*4;
+		PalFile.get(ch); palette[i].b	= ch*4;
+		palette[i].a = 255;
 		
-		palette[i].peFlags = PC_NOCOLLAPSE;		
 	}
 	
 	PalFile.close();	
 }
 
-void LD3ENGINE::LoadTileSet(WINAPP *WinApp, char* Filename, int start)
+void LD3ENGINE::LoadTileSet(WINAPP *WinApp, const char* Filename, int start)
 {
 	//- Load the tile sprites
 	//-----------------------
 
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
+	SDL_Surface		*surf;
 	UCHAR			*TileBuffer;
 	long			lp;
 	int		n = start;
@@ -67,43 +67,52 @@ void LD3ENGINE::LoadTileSet(WINAPP *WinApp, char* Filename, int start)
 	char	ch;
 
 	ifstream SpriteFile(Filename, ios::binary);
+
+	if (!SpriteFile.is_open())
+	{
+		SDL_ShowSimpleMessageBox(0, "Error", "Unable to open file.", WinApp->hwnd);
+		return;
+	}
 	
 	SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
 	SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
 
-	WinApp->lpddsTiles[start/160]->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		TileBuffer = (UCHAR *)ddsd->lpSurface;
-	
-		while(!SpriteFile.eof())
-		{
-			SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
+	surf = WinApp->lpddsTiles[start/160];
+	SDL_LockSurface(surf);
+	TileBuffer = (UCHAR *)surf->pixels;
 
-			for(int y = 0; y <= 19; y++)
+
+	while(!SpriteFile.eof())
+	{
+		SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
+
+		for(int y = 0; y <= 19; y++)
+		{
+			for(int x = 0; x <= 19; x++)
 			{
-				for(int x = 0; x <= 19; x++)
-				{
-					SpriteFile.get(ch);
-					//sTiles[x+y*20][n] = ch;
-					//TileBuffer[n*20+x+y*ddsd->lPitch] = ch;
-					//if(start >= 160)
-					//	tl = n-160;
-					//else
-					//	tl = n;
-					//tl = n % 160;
-					TileBuffer[((tl&15)*20)+x+(y+((tl>>4)*20))*ddsd->lPitch] = ch;
-				}
-			}
-			//n++;
-			tl++;
-			if(tl >= 160){
-				WinApp->lpddsTiles[start/160]->Unlock(NULL);
-				start += 160;
-				WinApp->lpddsTiles[start/160]->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-				TileBuffer = (UCHAR *)ddsd->lpSurface;
-				tl = 0;
+				SpriteFile.get(ch);
+				//sTiles[x+y*20][n] = ch;
+				//TileBuffer[n*20+x+y*ddsd->lPitch] = ch;
+				//if(start >= 160)
+				//	tl = n-160;
+				//else
+				//	tl = n;
+				//tl = n % 160;
+				TileBuffer[((tl&15)*20)+x+(y+((tl>>4)*20))*surf->pitch] = ch;
 			}
 		}
-	WinApp->lpddsTiles[start/160]->Unlock(NULL);
+		//n++;
+		tl++;
+		if(tl >= 160){
+			SDL_UnlockSurface(surf);
+			start += 160;
+			surf = WinApp->lpddsTiles[start/160];
+			SDL_LockSurface(surf);
+			TileBuffer = (UCHAR *)surf->pixels;
+			tl = 0;
+		}
+	}
+	SDL_UnlockSurface(surf);
 
 	SpriteFile.close();
 	//MaxTiles = n-2;
@@ -145,12 +154,12 @@ void LD3ENGINE::LoadMap(WINAPP *WinApp)
 	MapFile.close();*/
 }
 
-void LD3ENGINE::LoadMap(char* Filename)
+void LD3ENGINE::LoadMap(const char* Filename)
 {
 	//- Load the map with dialog box selection
 	//----------------------------------------
 	
-	UCHAR			ch1, ch2;
+	char			ch1, ch2;
 	int				m;
 	
 	ifstream MapFile(Filename, ios::binary);
@@ -170,8 +179,8 @@ void LD3ENGINE::LoadMap(char* Filename)
 					//Map[mx+my*MapWidth+(ml*55000)] = ch;
 					MapFile.get(ch1);
 					MapFile.get(ch2);
-					m = ch1<<8;
-					m += ch2;
+					m = ((UCHAR)(ch1))<<8;
+					m += (UCHAR)ch2;
 					Map[mx+my*MapWidth+(ml*55000)] = m;
 				}
 
@@ -188,12 +197,12 @@ void LD3ENGINE::LoadMap(char* Filename)
 	MapFile.close();
 }
 
-void LD3ENGINE::LoadSprite(WINAPP *WinApp, char* Filename, int Num, int start)
+void LD3ENGINE::LoadSprite(WINAPP *WinApp, const char* Filename, int Num, int start)
 {
 	//- Load a character sprite file
 	//------------------------------
 
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
+	SDL_Surface *surf;
 	UCHAR			*SpriteBuffer;
 	char			ch;
 	int				n = start;
@@ -204,8 +213,9 @@ void LD3ENGINE::LoadSprite(WINAPP *WinApp, char* Filename, int Num, int start)
 	SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
 	SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
 
-	WinApp->lpddsSprites[Num]->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		SpriteBuffer = (UCHAR *)ddsd->lpSurface;
+	surf = WinApp->lpddsSprites[Num];
+	SDL_LockSurface(surf);
+		SpriteBuffer = (UCHAR *)surf->pixels;
 	
 		while(!SpriteFile.eof())
 		{
@@ -218,17 +228,17 @@ void LD3ENGINE::LoadSprite(WINAPP *WinApp, char* Filename, int Num, int start)
 					SpriteFile.get(ch);
 					//Sprite[x+y*20][n][Num] = ch;
 					//SpriteBuffer[Num*1600+n*20+x+y*ddsd->lPitch] = ch;
-					SpriteBuffer[((n&15)*20)+x+(y+((n>>4)*20))*ddsd->lPitch] = ch;					
+					SpriteBuffer[((n&15)*20)+x+(y+((n>>4)*20))*surf->pitch] = ch;					
 				}
 			}
 			n++;
 		}
-	WinApp->lpddsSprites[Num]->Unlock(NULL);
+	SDL_UnlockSurface(surf);
 			
 	SpriteFile.close();	
 }
 
-void LD3ENGINE::LoadFont(char* Filename)
+void LD3ENGINE::LoadFont(const char* Filename)
 {
 	//- Load a character sprite file
 	//------------------------------
@@ -264,82 +274,21 @@ void LD3ENGINE::ClearBuffer(WINAPP *WinApp, int col)
 {
 	//- color the entire surface with the given color
 
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
-	UCHAR			*VideoBuffer;
-	long			lp;
-
-	WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		VideoBuffer = (UCHAR *)ddsd->lpSurface;
-	
-		lp = 0;
-		for(int y = 0; y < yRes; y++){
-			for(int x = 0; x < xRes; x++){
-				VideoBuffer[lp+x] = col;
-			}
-			lp += ddsd->lPitch;
-		}		
-		
-	WinApp->lpddsback->Unlock(NULL);
+	SDL_FillRect(WinApp->lpddsback, NULL, col);
 }
 
 void LD3ENGINE::DrawSky(WINAPP *WinApp, int xShift, int yShift)
 {
 	//- Draw the sky
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
 	UCHAR			*VideoBuffer;
 	long			lp;
-	static			CloudCount = 0;
-	RECT			SrcArea, DestArea;
-	bool			FillBlank = false;
+	static int		CloudCount = 0;
 	int				ss = 0;
 	int				flip = 0;
 	
-
-	WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		VideoBuffer = (UCHAR *)ddsd->lpSurface;
+	SDL_LockSurface(WinApp->lpddsback);
+		VideoBuffer = (UCHAR *)WinApp->lpddsback->pixels;
 	
-		/*lp = 0;
-		for(int y = 0; y < 64; y++){
-			for(int x = 0; x < xRes; x++){
-				VideoBuffer[lp+x] = Sky[(x+((xShift+CloudCount)>>4)) & 127][y][0];
-			}
-			lp += ddsd->lPitch;
-		}
-		for(y = 0; y < 64; y++){
-			for(int x = 0; x < xRes; x++){
-				VideoBuffer[lp+x] = Sky[(x+(xShift>>3)) & 127][y][1];
-			}
-			lp += ddsd->lPitch;
-		}
-		for(y = 0; y < 64; y++){
-			for(int x = 0; x < xRes; x++){
-				VideoBuffer[lp+x] = Sky[(x+(xShift>>2)) & 127][y][2];
-			}
-			lp += ddsd->lPitch;
-		}
-		if(WinApp->yRes <= 256){
-			for(y = 0; y < WinApp->yRes-192; y++){
-				for(int x = 0; x < xRes; x++){
-					VideoBuffer[lp+x] = Sky[(x+(xShift>>1)) & 127][y][3];
-				}
-				lp += ddsd->lPitch;
-			}
-		}
-		else
-		{
-			for(y = 0; y < 64; y++){
-				for(int x = 0; x < xRes; x++){
-					VideoBuffer[lp+x] = Sky[(x+(xShift>>1)) & 127][y][3];
-				}
-				lp += ddsd->lPitch;
-			}
-			DestArea.top = 256;
-			DestArea.bottom = WinApp->yRes;
-			DestArea.left = 0;
-			DestArea.right = WinApp->xRes;
-			WinApp->ddbltfx.dwFillColor = Sky[1][63][3];
-			FillBlank = true;			
-		}*/
 
 		lp = 0;
 		CloudCount += AutoXShift;
@@ -353,7 +302,7 @@ void LD3ENGINE::DrawSky(WINAPP *WinApp, int xShift, int yShift)
 					for(int x = 0; x < xRes; x++){
 						VideoBuffer[lp+x] = Sky[(x+((xShift+CloudCount)>>ss)) & 511][flip];
 					}
-					lp += ddsd->lPitch;
+					lp += WinApp->lpddsback->pitch;
 				}
 			}
 			else{
@@ -362,7 +311,7 @@ void LD3ENGINE::DrawSky(WINAPP *WinApp, int xShift, int yShift)
 					for(int x = 0; x < xRes; x++){
 						VideoBuffer[lp+x] = Sky[(x+((xShift+CloudCount)>>ss)) & 511][y+(yShift>>SkyVerticalScrollShift) & 255];
 					}
-					lp += ddsd->lPitch;
+					lp += WinApp->lpddsback->pitch;
 				}
 			}
 		}
@@ -374,7 +323,7 @@ void LD3ENGINE::DrawSky(WINAPP *WinApp, int xShift, int yShift)
 						flip = abs(511-abs(511 - ((x+((xShift+CloudCount)>>ss)) & 1023)));
 						VideoBuffer[lp+x] = Sky[flip][y];
 					}
-					lp += ddsd->lPitch;
+					lp += WinApp->lpddsback->pitch;
 				}
 			}
 			else{
@@ -383,28 +332,15 @@ void LD3ENGINE::DrawSky(WINAPP *WinApp, int xShift, int yShift)
 					for(int x = 0; x < xRes; x++){
 						VideoBuffer[lp+x] = Sky[(x+((xShift+CloudCount)>>ss)) & 511][y];
 					}
-					lp += ddsd->lPitch;
+					lp += WinApp->lpddsback->pitch;
 				}
 			}
 		}
 		
 
-		//CloudCount += 4;
-		//if(CloudCount > 2047) CloudCount -= 2048;
-		//for(int y = 0; y < yRes-(yShift>>4); y++){
-		//	for(int x = 0; x < xRes; x++){
-		//		VideoBuffer[x+y*ddsd->lPitch] = Sky[(x+(xShift>>2))%1280][(y+(yShift>>4))%240];
-		//	}			
-		//}
-		//for(y = yRes-(yShift>>4); y < yRes; y++){
-		//	for(int x = 0; x < xRes; x++){
-		//		VideoBuffer[x+y*ddsd->lPitch] = Sky[(x+(xShift>>2))%1280][239];
-		//	}			
-		//}
 		
-	WinApp->lpddsback->Unlock(NULL);
+	SDL_UnlockSurface(WinApp->lpddsback);
 	
-	if(FillBlank) WinApp->lpddsback->Blt(&DestArea, NULL, NULL, DDBLT_COLORFILL | DDBLT_WAIT, &WinApp->ddbltfx);
 }
 
 void LD3ENGINE::DrawMap(WINAPP *WinApp, int xShift, int yShift, int layer, float diff)
@@ -412,7 +348,6 @@ void LD3ENGINE::DrawMap(WINAPP *WinApp, int xShift, int yShift, int layer, float
 	//- Draw the map onto the screen
 	//------------------------------
 
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
 	UCHAR			*VideoBuffer;
 	int				mx, my, ml;
 	int				cx, cy;
@@ -428,7 +363,7 @@ void LD3ENGINE::DrawMap(WINAPP *WinApp, int xShift, int yShift, int layer, float
 	int				ani;
 	int				mxmax, mymax;
 	static float	Animation = 0;
-	RECT			SrcArea, DestArea;
+	SDL_Rect			SrcArea, DestArea;
 	int				top, left;
 	
 	xs = xShift / 20;
@@ -439,8 +374,6 @@ void LD3ENGINE::DrawMap(WINAPP *WinApp, int xShift, int yShift, int layer, float
 	ml = layer;
 	long myys;
 	
-	//WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-	//	VideoBuffer = (UCHAR *)ddsd->lpSurface;
 		
 		mlt = ml*55000; top = 0;
 		for(my = 0; my <= mymax; my++)
@@ -448,22 +381,10 @@ void LD3ENGINE::DrawMap(WINAPP *WinApp, int xShift, int yShift, int layer, float
 			left = 0;
 			for(mx = 0; mx <= mxmax; mx++)
 			{
-				/*cxstart = (mx+1)*20-20-(xShift%20);	cystart = (my+1)*20-20-(yShift%20);
-				cxend	= cxstart+19;				cyend	= cystart+19;
-				xadd    = 0;						yadd    = 0;
-				xmin	= 0;						ymin	= 0;
-
-				if(mx == 0 || my == 0 || mx == 16 || my == 12)
-				{
-					if(cxstart < 0)			{xadd = abs(cxstart); cxstart = 0;}
-					if(cxend > 319)			{cxend = 319; xmin = 19-abs(cxend-cxstart);}
-					if(cystart < 0)			{yadd = abs(cystart); cystart = 0;}
-					if(cyend > 239)			{cyend = 239; ymin = 19-abs(cyend-cystart);}
-				}*/
-				DestArea.top	= top-(yShift%20);
-				DestArea.bottom = DestArea.top+20;
-				DestArea.left	= left-(xShift%20);
-				DestArea.right	= DestArea.left+20;
+				DestArea.y	= top-(yShift%20);
+				DestArea.w 	= 20;
+				DestArea.x	= left-(xShift%20);
+				DestArea.h	= 20;
 								
 				myys = mx+xs+(my+ys)*MapWidth;
 				
@@ -476,39 +397,32 @@ void LD3ENGINE::DrawMap(WINAPP *WinApp, int xShift, int yShift, int layer, float
 
 				if(tile < 160){
 					
-					SrcArea.top		= (tile>>4)*20;
-					SrcArea.bottom	= SrcArea.top+20;
-					SrcArea.left	= (tile&15)*20;
-					SrcArea.right	= SrcArea.left+20;
+					SrcArea.y	= (tile>>4)*20;
+					SrcArea.w	= 20;
+					SrcArea.x	= (tile&15)*20;
+					SrcArea.h	= 20;
 
-					WinApp->lpddsback->Blt(&DestArea, WinApp->lpddsTiles[0], &SrcArea, DDBLT_KEYSRC | DDBLT_WAIT, NULL);
+					SDL_SetSurfacePalette(WinApp->lpddsTiles[0], WinApp->lpddpal);
+					SDL_BlitSurface(WinApp->lpddsTiles[0], &SrcArea, WinApp->lpddsback, &DestArea);
 				
-					/*for(int cy = 0; cy <= 19-yadd-ymin; cy++)
-					{
-						for(int cx = 0; cx <= 19-xadd-xmin; cx++)
-						{					
-							col = sTiles[cx+xadd+(cy+yadd)*20][tile];
-							if(col > 0) VideoBuffer[cxstart+cx+ (cystart+cy)*ddsd->lPitch] = col;							
-						}
-					}*/
 				}
 				else{
 
 					num = tile / 160;
 					tile = tile % 160;
-					SrcArea.top		= (tile>>4)*20;
-					SrcArea.bottom	= SrcArea.top+20;
-					SrcArea.left	= (tile&15)*20;
-					SrcArea.right	= SrcArea.left+20;
+					SrcArea.y	= (tile>>4)*20;
+					SrcArea.h	= 20;
+					SrcArea.x	= (tile&15)*20;
+					SrcArea.w	= 20;
 				
-					WinApp->lpddsback->Blt(&DestArea, WinApp->lpddsTiles[num], &SrcArea, DDBLT_KEYSRC | DDBLT_WAIT, NULL);
+					SDL_SetSurfacePalette(WinApp->lpddsTiles[num], WinApp->lpddpal);
+					SDL_BlitSurface(WinApp->lpddsTiles[num], &SrcArea, WinApp->lpddsback, &DestArea);
 				}
 				left += 20;
 			}
 			top += 20;
 		}		
 		
-	//WinApp->lpddsback->Unlock(NULL);
 	Animation += AniSpeed*diff;
 	if(Animation > 362880) Animation = 0;	
 }
@@ -517,49 +431,62 @@ void LD3ENGINE::FlipSurfaces(WINAPP *WinApp)
 {
 	//- Flip the primary and secondary surfaces
 	//-----------------------------------------
-	 
-	//while(WinApp->lpddsprimary->Flip(NULL, DDFLIP_WAIT) != DD_OK);
-	if(WinApp->WindowMode == false)
-		while(WinApp->lpddsprimary->Flip(NULL, DDFLIP_WAIT) != DD_OK);
-	else{
+	
+	SDL_Surface *palResolveSurf = SDL_ConvertSurfaceFormat(WinApp->lpddsback, SDL_PIXELFORMAT_RGBA8888, 0);
+	SDL_Texture *tex = SDL_CreateTextureFromSurface(WinApp->lpRenderer, palResolveSurf);
+	SDL_RenderClear(WinApp->lpRenderer);
+	SDL_UpdateTexture(WinApp->lpddsprimary, 0, palResolveSurf->pixels, palResolveSurf->pitch);
+	SDL_RenderCopy(WinApp->lpRenderer, tex, NULL, NULL);
+	SDL_RenderPresent(WinApp->lpRenderer);
+	SDL_FreeSurface(palResolveSurf);
+	SDL_DestroyTexture(tex);
+}
 
-		RECT DestArea, SrcArea;
-		RECT WindowArea, ClientArea;
-		
-		GetWindowRect(WinApp->hwnd, &WindowArea);
-		GetClientRect(WinApp->hwnd, &ClientArea);	
-
-		DestArea.top	= WindowArea.top;				SrcArea.top	= 0;
-		DestArea.bottom	= WindowArea.top+WinApp->yRes;	SrcArea.bottom	= WinApp->yRes;
-		DestArea.left	= WindowArea.left;				SrcArea.left	= 0;
-		DestArea.right	= WindowArea.left+WinApp->xRes;	SrcArea.right	= WinApp->xRes;
-		
-		WinApp->lpddsprimary->Blt(&DestArea, WinApp->lpddsback, &SrcArea, DDBLT_KEYSRC | DDBLT_WAIT | DDBLT_DDFX, &WinApp->ddbltfx);
-
-		if(WindowResized){
-			/*RGNDATA regiondata;
-
-			regiondata.rdh.dwSize			= sizeof(RGNDATAHEADER);
-			regiondata.rdh.iType			= RDH_RECTANGLES;
-			regiondata.rdh.nCount			= 1;
-			regiondata.rdh.nRgnSize			= sizeof(RECT);
-			regiondata.rdh.rcBound.top		= 0;
-			regiondata.rdh.rcBound.bottom	= yRes-1;
-			regiondata.rdh.rcBound.left		= 0;
-			regiondata.rdh.rcBound.right	= xRes-1;
-
-			ClipArea.top = 0;
-			ClipArea.bottom = yRes;
-			ClipArea.left = 0;
-			ClipArea.right = xRes;
-			memcpy(regiondata.Buffer, ClipArea, sizeof(RECT));
-			//WinApp->lpddclipper->Release();
-			WinApp->lpdd->CreateClipper(0, &WinApp->lpddclipper, NULL);
-			WinApp->lpddclipper->SetClipList(&regiondata, 0);
-			WinApp->lpddsback->SetClipper(WinApp->lpddclipper);*/
-			WindowResized = false;
-		}	
+void SLX_BlitFlipSurface(SDL_Surface *src, SDL_Rect *srcRect, SDL_Surface *dst, SDL_Rect *dstRect, bool flipH, bool flipV)
+{
+	if (dstRect->x + srcRect->w > dst->w)
+		srcRect->w = dst->w - dstRect->x;
+	if (dstRect->x < 0)
+	{
+		srcRect->w += dstRect->x;
+		srcRect->x -= dstRect->x;
+		dstRect->x = 0;
+	}	
+	if (dstRect->y + srcRect->h > dst->h)
+		srcRect->h = dst->h - dstRect->y;
+	if (dstRect->y < 0)
+	{
+		srcRect->h += dstRect->y;
+		srcRect->y -= dstRect->y;
+		dstRect->y = 0;
 	}
+	if (srcRect->w <= 0 || srcRect->h <= 0)
+		return;
+	SDL_LockSurface(src);
+	SDL_LockSurface(dst);
+	uint8_t *srcptr = (uint8_t*)src->pixels + (srcRect->y * src->pitch) + srcRect->x;
+	uint8_t *dstptr = (uint8_t*)dst->pixels + (dstRect->y * dst->pitch) + dstRect->x;
+	uint32_t colourKey;
+	SDL_GetColorKey(src, &colourKey);
+	int srcNextPx = flipH?-1:1;
+	int srcNextLine = flipV?((flipH?-srcRect->w:srcRect->w)-src->pitch):(src->pitch-(flipH?-srcRect->w:srcRect->w));
+	if (flipH) srcptr += srcRect->w-1;
+	if (flipV) srcptr += src->pitch * srcRect->h;
+
+	for (int y = 0; y < srcRect->h; ++y)
+	{
+		for (int x = 0; x < srcRect->w; ++x)
+		{
+			if (*srcptr != colourKey)
+				*dstptr = *srcptr;
+			dstptr++;
+			srcptr += srcNextPx;
+		}
+		dstptr += dst->pitch - srcRect->w;
+		srcptr += srcNextLine;
+	}
+	SDL_UnlockSurface(dst);
+	SDL_UnlockSurface(src);
 }
 
 void LD3ENGINE::PutSprite(WINAPP *WinApp, int x, int y, int Num, int Tile, bool xFlip)
@@ -567,14 +494,13 @@ void LD3ENGINE::PutSprite(WINAPP *WinApp, int x, int y, int Num, int Tile, bool 
 	//- Draw the given sprite onto the secondary surface
 	//--------------------------------------------------
 
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
 	UCHAR			*VideoBuffer;
 	int				col;
 	int				cystart, cyend;
 	int             cxstart, cxend;
 	int				xadd, yadd;
 	int				TileNum = 0;
-	RECT			SrcArea, DestArea;
+	SDL_Rect			SrcArea, DestArea;
 
 	/*cxstart = x;    cystart = y;
 	cxend   = x+19; cyend   = x+19;
@@ -588,25 +514,30 @@ void LD3ENGINE::PutSprite(WINAPP *WinApp, int x, int y, int Num, int Tile, bool 
 		if(y < 0)        {cystart = 0; yadd = fabs(y);}
 		if((y+19) > 239) cyend = 239;*/
 
-		DestArea.top	= y;
-		DestArea.bottom = y+20;
-		DestArea.left	= x;
-		DestArea.right	= x+20;
+		DestArea.y	= y;
+		DestArea.h 	= 20;
+		DestArea.x	= x;
+		DestArea.w	= 20;
 
 		if(Num == -1){
 
 			TileNum = Tile / 160;
 			Tile = Tile % 160;
 
-			SrcArea.top		= (Tile>>4)*20;
-			SrcArea.bottom	= SrcArea.top+20;
-			SrcArea.left	= (Tile & 15)*20;
-			SrcArea.right	= SrcArea.left+20;		
+			SrcArea.y	= (Tile>>4)*20;
+			SrcArea.h	= 20;
+			SrcArea.x	= (Tile & 15)*20;
+			SrcArea.w	= 20;		
 
-			if(xFlip)
-				WinApp->lpddsback->Blt(&DestArea, WinApp->lpddsTiles[TileNum], &SrcArea,  DDBLT_KEYSRC | DDBLT_WAIT | DDBLT_DDFX, &WinApp->ddbltfx);
-			else
-				WinApp->lpddsback->Blt(&DestArea, WinApp->lpddsTiles[TileNum], &SrcArea, DDBLT_KEYSRC | DDBLT_WAIT, NULL);
+			//if(xFlip)
+			{
+				SLX_BlitFlipSurface(WinApp->lpddsTiles[TileNum], &SrcArea, WinApp->lpddsback, &DestArea, xFlip, false);
+			}
+			/*else
+			{	
+				SDL_SetSurfacePalette(WinApp->lpddsTiles[TileNum], WinApp->lpddpal);
+				SDL_BlitSurface(WinApp->lpddsTiles[TileNum], &SrcArea, WinApp->lpddsback, &DestArea);
+			}*/
 			
 			/*if(xFlip)
 			{
@@ -647,15 +578,12 @@ void LD3ENGINE::PutSprite(WINAPP *WinApp, int x, int y, int Num, int Tile, bool 
 		}
 		else
 		{
-			SrcArea.top		= (Tile>>4)*20;
-			SrcArea.bottom	= SrcArea.top+20;
-			SrcArea.left	= (Tile & 15)*20;
-			SrcArea.right	= SrcArea.left+20;			
+			SrcArea.y	= (Tile>>4)*20;
+			SrcArea.h	= 20;
+			SrcArea.x	= (Tile & 15)*20;
+			SrcArea.w	= 20;			
 		
-			if(xFlip)
-				WinApp->lpddsback->Blt(&DestArea, WinApp->lpddsSprites[Num], &SrcArea,  DDBLT_KEYSRC | DDBLT_WAIT | DDBLT_DDFX, &WinApp->ddbltfx);
-			else
-				WinApp->lpddsback->Blt(&DestArea, WinApp->lpddsSprites[Num], &SrcArea, DDBLT_KEYSRC | DDBLT_WAIT, NULL);
+			SLX_BlitFlipSurface(WinApp->lpddsSprites[Num], &SrcArea, WinApp->lpddsback, &DestArea, xFlip, false);
 		
 			/*if(xFlip)
 			{
@@ -687,23 +615,24 @@ void LD3ENGINE::PutSprite(WINAPP *WinApp, int x, int y, int Num, int Tile, bool 
 	//WinApp->lpddsback->Unlock(NULL);
 }
 
-void LD3ENGINE::LoadMapIcon(WINAPP *WinApp, char *Filename, int x, int y)
+void LD3ENGINE::LoadMapIcon(WINAPP *WinApp, const char *Filename, int x, int y)
 {
 	//- Load a map icon
 
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
+	SDL_Surface *surf;
 	UCHAR			*VideoBuffer;
 	long			lp;
-	byte  ch;
+	char  ch;
 
 	ifstream BitmapFile(Filename, ios::binary);	
 
 	BitmapFile.seekg(1078);
 
-	WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		VideoBuffer = (UCHAR *)ddsd->lpSurface;
+	surf = WinApp->lpddsback;
+	SDL_LockSurface(surf);
+		VideoBuffer = (UCHAR *)surf->pixels;
 
-		lp = ddsd->lPitch*(y+30);
+		lp = surf->pitch*(y+30);
 		for(int cy = 29; cy >= 0; cy--)
 		{
 			for(int cx = 0; cx <= 39; cx++)
@@ -711,25 +640,25 @@ void LD3ENGINE::LoadMapIcon(WINAPP *WinApp, char *Filename, int x, int y)
 				BitmapFile.get(ch);
 				VideoBuffer[lp+cx+x] = ch;					
 			}
-			lp -= ddsd->lPitch;
+			lp -= surf->pitch;
 		}
 
-	WinApp->lpddsback->Unlock(NULL);
+	SDL_UnlockSurface(surf);
 
 	BitmapFile.close();
 }
 
-void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
+void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, const char* Filename, int delay)
 {
 	//- Load a map icon
 
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
+	SDL_Surface *surf;
 	UCHAR			*VideoBuffer;
 	long			lp;
-	byte			ch;
-	PALETTEENTRY	SplashPalette[256];
-	PALETTEENTRY	FadePalette[256];
-	PALETTEENTRY	ShiftPalette[256];
+	char			ch;
+	SDL_Color	SplashPalette[256];
+	SDL_Color	FadePalette[256];
+	SDL_Color	ShiftPalette[256];
 	DWORD			TickCount;
 	bool			PaletteChange;
 	int				xadd;
@@ -740,24 +669,24 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 
 	for(int i = 0; i <= 255; i++)
 	{
-		BitmapFile.get(ch); SplashPalette[i].peBlue		= ch;
-		BitmapFile.get(ch); SplashPalette[i].peGreen	= ch;
-		BitmapFile.get(ch); SplashPalette[i].peRed		= ch;
-		BitmapFile.get(ch); SplashPalette[i].peFlags	= NULL;
+		BitmapFile.get(ch); SplashPalette[i].b		= ch;
+		BitmapFile.get(ch); SplashPalette[i].g	= ch;
+		BitmapFile.get(ch); SplashPalette[i].r		= ch;
+		BitmapFile.get(ch); SplashPalette[i].a	= 255;
 	}
 	
-	memset(FadePalette, 0, sizeof(PALETTEENTRY)*256);
-	//memcpy(FadePalette, SplashPalette, sizeof(PALETTEENTRY)*256);
-	WinApp->lpddpal->Release();
-	WinApp->lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, FadePalette, &WinApp->lpddpal, NULL);
-	WinApp->lpddsprimary->SetPalette(WinApp->lpddpal);
+	memset(FadePalette, 0, sizeof(SDL_Color)*256);
+	//memcpy(FadePalette, SplashPalette, sizeof(SDL_Color)*256);
+	SDL_FreePalette(WinApp->lpddpal);
+	WinApp->lpddpal = SDL_AllocPalette(256);
+	SDL_SetSurfacePalette(WinApp->lpddsback, WinApp->lpddpal);
 	
 	xadd = (WinApp->xRes-320)/2;
 
-	WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		VideoBuffer = (UCHAR *)ddsd->lpSurface;
+	SDL_LockSurface(WinApp->lpddsback);
+		VideoBuffer = (UCHAR *)WinApp->lpddsback->pixels;
 
-		lp = ddsd->lPitch*(WinApp->yRes-((WinApp->yRes-240)/2)-1);//239;
+		lp = WinApp->lpddsback->pitch*(WinApp->yRes-((WinApp->yRes-240)/2)-1);//239;
 		for(int y = 239; y >= 0; y--)
 		{
 			for(int x = 0; x <= 319; x++)
@@ -766,21 +695,22 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 				if(ch == 255) ch = 0;
 				VideoBuffer[lp+x+xadd] = ch;					
 			}
-			lp -= ddsd->lPitch;
+			lp -= WinApp->lpddsback->pitch;
 		}
 
-	WinApp->lpddsback->Unlock(NULL);
+	SDL_UnlockSurface(WinApp->lpddsback);
 
 	BitmapFile.close();
 
 	FlipSurfaces(WinApp);
 
-	for(i = 0; i <= 390; i++) WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
+	// TODO(davidgow): If this is timing, we should do a better job.
+	for(int i = 0; i <= 390; i++) FlipSurfaces(WinApp);
 
 	PaletteChange = true;
 	while(PaletteChange)
 	{
-		TickCount = GetTickCount();
+		TickCount = SDL_GetTicks();
 	
 		//WinApp->lpddpal->Release();
 		//WinApp->lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, FadePalette, &WinApp->lpddpal, NULL);
@@ -788,15 +718,18 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 		
 		PaletteChange = false;
 		for(int n = 0; n <= 255; n++){
-			if(FadePalette[n].peRed < SplashPalette[n].peRed){FadePalette[n].peRed += 2; PaletteChange = true;}
-			if(FadePalette[n].peGreen < SplashPalette[n].peGreen){FadePalette[n].peGreen += 2; PaletteChange = true;}
-			if(FadePalette[n].peBlue < SplashPalette[n].peBlue){FadePalette[n].peBlue += 2; PaletteChange = true;}
-			if(FadePalette[n].peRed > SplashPalette[n].peRed) FadePalette[n].peRed = SplashPalette[n].peRed;
-			if(FadePalette[n].peGreen > SplashPalette[n].peGreen) FadePalette[n].peGreen = SplashPalette[n].peGreen;
-			if(FadePalette[n].peBlue > SplashPalette[n].peBlue) FadePalette[n].peBlue = SplashPalette[n].peBlue;
+			if(FadePalette[n].r < SplashPalette[n].r){FadePalette[n].r += 2; PaletteChange = true;}
+			if(FadePalette[n].g < SplashPalette[n].g){FadePalette[n].g += 2; PaletteChange = true;}
+			if(FadePalette[n].b < SplashPalette[n].b){FadePalette[n].b += 2; PaletteChange = true;}
+			if(FadePalette[n].r > SplashPalette[n].r) FadePalette[n].r = SplashPalette[n].r;
+			if(FadePalette[n].g > SplashPalette[n].g) FadePalette[n].g = SplashPalette[n].g;
+			if(FadePalette[n].b > SplashPalette[n].b) FadePalette[n].b = SplashPalette[n].b;
 		}
-		WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
-		WinApp->lpddpal->SetEntries(0, 0, 255, &FadePalette[0]);
+		// TODO(davidgow): We'll just flip again here?
+		//WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
+		FlipSurfaces(WinApp);
+
+		SDL_SetPaletteColors(WinApp->lpddpal, &FadePalette[0], 0, 255);
 
 		//while(GetTickCount()-TickCount < 1.3f);		
 		//WinApp->lpddpal->GetEntries(0, 1, 254, FadePalette);
@@ -805,10 +738,12 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 		
 	}
 
-	TickCount = GetTickCount();
-	while(GetTickCount()-TickCount < delay){
+	TickCount = SDL_GetTicks();
+	while(SDL_GetTicks()-TickCount < delay){
 		
-		WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
+		// TODO(davidgow): Again, WaitForVerticalBlank -> FlipSurfaces
+		//WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
+		FlipSurfaces(WinApp);
 		
 		/*for(int n = 0; n <= 2; n++){
 			WinApp->lpddpal->GetEntries(0, 1, 254, FadePalette);
@@ -824,7 +759,7 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 	PaletteChange = true;
 	while(PaletteChange)
 	{
-		TickCount = GetTickCount();
+		TickCount = SDL_GetTicks();
 	
 		//WinApp->lpddpal->Release();
 		//WinApp->lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, FadePalette, &WinApp->lpddpal, NULL);
@@ -832,15 +767,18 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 		
 		PaletteChange = false;
 		for(int n = 0; n <= 255; n++){
-			if(FadePalette[n].peRed < 255){FadePalette[n].peRed += 1; PaletteChange = true;}
-			if(FadePalette[n].peGreen < 255){FadePalette[n].peGreen += 1; PaletteChange = true;}
-			if(FadePalette[n].peBlue < 255){FadePalette[n].peBlue += 1; PaletteChange = true;}
-			//if(FadePalette[n].peRed < 0) FadePalette[n].peRed = 0;
-			//if(FadePalette[n].peGreen < 0) FadePalette[n].peGreen = 0;
-			//if(FadePalette[n].peBlue < 0) FadePalette[n].peBlue = 0;
+			if(FadePalette[n].r < 255){FadePalette[n].r += 1; PaletteChange = true;}
+			if(FadePalette[n].g < 255){FadePalette[n].g += 1; PaletteChange = true;}
+			if(FadePalette[n].b < 255){FadePalette[n].b += 1; PaletteChange = true;}
+			//if(FadePalette[n].r < 0) FadePalette[n].r = 0;
+			//if(FadePalette[n].g < 0) FadePalette[n].g = 0;
+			//if(FadePalette[n].b < 0) FadePalette[n].b = 0;
 		}
-		WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
-		WinApp->lpddpal->SetEntries(0, 0, 255, &FadePalette[0]);
+		// TODO(davidgow): We'll just flip again here?
+		//WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
+		FlipSurfaces(WinApp);
+
+		SDL_SetPaletteColors(WinApp->lpddpal, &FadePalette[0], 0, 255);
 
 		//while(GetTickCount()-TickCount < 1.3f);
 		//WinApp->lpddpal->GetEntries(0, 1, 254, FadePalette);
@@ -849,15 +787,16 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 		
 	}
 
-	for(i = 0; i <= 150; i++) WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
+	for(int i = 0; i <= 150; i++) FlipSurfaces(WinApp);
 	
 	ClearBuffer(WinApp, 0);	FlipSurfaces(WinApp);
+	// TODO(davidgow): We're not really flipping, so this second one is redundant.
 	ClearBuffer(WinApp, 0);	FlipSurfaces(WinApp);
 
 	PaletteChange = true;
 	while(PaletteChange)
 	{
-		TickCount = GetTickCount();
+		TickCount = SDL_GetTicks();
 	
 		//WinApp->lpddpal->Release();
 		//WinApp->lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, FadePalette, &WinApp->lpddpal, NULL);
@@ -865,18 +804,18 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 		
 		PaletteChange = false;
 		for(int n = 0; n <= 255; n++){
-			if(FadePalette[n].peRed > 0){FadePalette[n].peRed -= 5; PaletteChange = true;}
-			if(FadePalette[n].peGreen > 0){FadePalette[n].peGreen -= 5; PaletteChange = true;}
-			if(FadePalette[n].peBlue > 0){FadePalette[n].peBlue -= 5; PaletteChange = true;}			
+			if(FadePalette[n].r > 0){FadePalette[n].r -= 5; PaletteChange = true;}
+			if(FadePalette[n].g > 0){FadePalette[n].g -= 5; PaletteChange = true;}
+			if(FadePalette[n].b > 0){FadePalette[n].b -= 5; PaletteChange = true;}			
 		}
-		WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
-		WinApp->lpddpal->SetEntries(0, 0, 255, &FadePalette[0]);
+		FlipSurfaces(WinApp);
+		SDL_SetPaletteColors(WinApp->lpddpal, &FadePalette[0], 0, 255);
 
 	}
 
-	WinApp->lpddpal->Release();
-	WinApp->lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, WinApp->palette, &WinApp->lpddpal, NULL);
-	WinApp->lpddsprimary->SetPalette(WinApp->lpddpal);	
+	SDL_FreePalette(WinApp->lpddpal);
+	WinApp->lpddpal = SDL_AllocPalette(256);
+	SDL_SetSurfacePalette(WinApp->lpddsback, WinApp->lpddpal);
 }
 
 /*void LD3ENGINE::LoadSky(WINAPP *WinApp, char* Filename, int pos, int Convert)
@@ -901,10 +840,10 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 
 		for(int i = 0; i <= 255; i++)
 		{
-			BitmapFile.get(ch); WinApp->palette[i].peBlue	= ch;
-			BitmapFile.get(ch); WinApp->palette[i].peGreen	= ch;
-			BitmapFile.get(ch); WinApp->palette[i].peRed	= ch;
-			BitmapFile.get(ch); WinApp->palette[i].peFlags = NULL;
+			BitmapFile.get(ch); WinApp->palette[i].b	= ch;
+			BitmapFile.get(ch); WinApp->palette[i].g	= ch;
+			BitmapFile.get(ch); WinApp->palette[i].r	= ch;
+			BitmapFile.get(ch); WinApp->palette[i].a 	= 255;
 		}
 	}
 	else
@@ -920,9 +859,9 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 			diff = 256; newcol = i;
 			for(int n = 0; n <= 255; n++)
 			{
-				rdif = abs(WinApp->palette[n].peRed   - red);
-				gdif = abs(WinApp->palette[n].peGreen - grn);
-				bdif = abs(WinApp->palette[n].peBlue  - blu);
+				rdif = abs(WinApp->palette[n].r   - red);
+				gdif = abs(WinApp->palette[n].g - grn);
+				bdif = abs(WinApp->palette[n].b  - blu);
 				av = (rdif + gdif + bdif) / 3;
 				if(av < diff)
 				{
@@ -953,11 +892,11 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, char* Filename, int delay)
 	BitmapFile.close();
 }*/
 
-void LD3ENGINE::LoadSky(WINAPP *WinApp, char* Filename, int pos, int Convert)
+void LD3ENGINE::LoadSky(WINAPP *WinApp, const char* Filename, int pos, int Convert)
 {
 	//- Load the sky
 
-	byte  ch;
+	char  ch;
 	char  ConvertTable[256];
 	byte  red, grn, blu;
 	int   diff;
@@ -975,10 +914,10 @@ void LD3ENGINE::LoadSky(WINAPP *WinApp, char* Filename, int pos, int Convert)
 
 		for(int i = 0; i <= 255; i++)
 		{
-			BitmapFile.get(ch); WinApp->palette[i].peBlue	= ch;
-			BitmapFile.get(ch); WinApp->palette[i].peGreen	= ch;
-			BitmapFile.get(ch); WinApp->palette[i].peRed	= ch;
-			BitmapFile.get(ch); WinApp->palette[i].peFlags = NULL;
+			BitmapFile.get(ch); WinApp->palette[i].b	= ch;
+			BitmapFile.get(ch); WinApp->palette[i].g	= ch;
+			BitmapFile.get(ch); WinApp->palette[i].r	= ch;
+			BitmapFile.get(ch); WinApp->palette[i].a 	= 255;
 		}
 	}
 	else if(Convert == 1)
@@ -987,16 +926,16 @@ void LD3ENGINE::LoadSky(WINAPP *WinApp, char* Filename, int pos, int Convert)
 
 		for(int i = 0; i <= 255; i++)
 		{
-			BitmapFile.get(blu);
-			BitmapFile.get(grn);
-			BitmapFile.get(red);
+			BitmapFile.get(ch); blu = ch;
+			BitmapFile.get(ch); grn = ch;
+			BitmapFile.get(ch); red = ch;
 			BitmapFile.get(ch);
 			diff = 256; newcol = i;
 			for(int n = 0; n <= 255; n++)
 			{
-				rdif = abs(WinApp->palette[n].peRed   - red);
-				gdif = abs(WinApp->palette[n].peGreen - grn);
-				bdif = abs(WinApp->palette[n].peBlue  - blu);
+				rdif = abs(WinApp->palette[n].r   - red);
+				gdif = abs(WinApp->palette[n].g - grn);
+				bdif = abs(WinApp->palette[n].b  - blu);
 				av = (rdif + gdif + bdif) / 3;
 				if(av < diff)
 				{
@@ -1024,8 +963,9 @@ void LD3ENGINE::LoadSky(WINAPP *WinApp, char* Filename, int pos, int Convert)
 	}
 
 	if(Convert == 0){
-		WinApp->lpdd->CreatePalette(DDPCAPS_8BIT | DDPCAPS_INITIALIZE | DDPCAPS_ALLOW256, WinApp->palette, &WinApp->lpddpal, NULL);
-		WinApp->lpddsprimary->SetPalette(WinApp->lpddpal);}
+		WinApp->lpddpal = SDL_AllocPalette(256);
+		SDL_SetPaletteColors(WinApp->lpddpal, WinApp->palette, 0, 256);
+		SDL_SetSurfacePalette(WinApp->lpddsback, WinApp->lpddpal);}
 	
 	BitmapFile.close();
 }
@@ -1037,7 +977,7 @@ void LD3ENGINE::SetSkyScroll(int yStart, int yEnd, int ShiftNum)
 
 void LD3ENGINE::WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center, bool trans)
 {
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
+	SDL_Surface *surf;
 	UCHAR			*VideoBuffer;
 	int				lp;
 	int				vn, ovn;
@@ -1045,10 +985,11 @@ void LD3ENGINE::WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center,
 	UCHAR			col;
 
 	
-	WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		VideoBuffer = (UCHAR *)ddsd->lpSurface;
+	surf = WinApp->lpddsback;
+	SDL_LockSurface(surf);
+		VideoBuffer = (UCHAR *)surf->pixels;
 
-		lp = ddsd->lPitch;	
+		lp = surf->pitch;	
 		tx = x;
 		length = strlen(Text);
 		if(center)
@@ -1090,12 +1031,11 @@ void LD3ENGINE::WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center,
 			}
 		}
 
-	WinApp->lpddsback->Unlock(NULL);
+	SDL_UnlockSurface(surf);
 }
 
 void LD3ENGINE::WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center, DWORD fcol, bool trans)
 {
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
 	UCHAR			*VideoBuffer;
 	int				lp;
 	int				vn, ovn;
@@ -1103,10 +1043,10 @@ void LD3ENGINE::WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center,
 	UCHAR			col;
 
 	
-	WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		VideoBuffer = (UCHAR *)ddsd->lpSurface;
+	SDL_LockSurface(WinApp->lpddsback);
+		VideoBuffer = (UCHAR *)WinApp->lpddsback->pixels;
 
-		lp = ddsd->lPitch;	
+		lp = WinApp->lpddsback->pitch;	
 		tx = x;
 		length = strlen(Text);
 		if(center)
@@ -1148,22 +1088,21 @@ void LD3ENGINE::WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center,
 			}
 		}
 
-	WinApp->lpddsback->Unlock(NULL);
+	SDL_UnlockSurface(WinApp->lpddsback);
 }
 
 void LD3ENGINE::DrawTalkBox(WINAPP *WinApp, int sy)
 {
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
 	UCHAR			*VideoBuffer;
 	int				lp;
 	int				vn;
 	long			syXlp;
 
 	
-	WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		VideoBuffer = (UCHAR *)ddsd->lpSurface;
+	SDL_LockSurface(WinApp->lpddsback);
+		VideoBuffer = (UCHAR *)WinApp->lpddsback->pixels;
 
-		lp = ddsd->lPitch;
+		lp = WinApp->lpddsback->pitch;
 		syXlp = sy*lp;
 		vn = syXlp;
 
@@ -1177,30 +1116,29 @@ void LD3ENGINE::DrawTalkBox(WINAPP *WinApp, int sy)
 		vn = syXlp;
 		for(int x = 0; x <= WinApp->xRes-1; x++) VideoBuffer[x+vn] = 28;
 		vn = lp*(19+sy);
-		for(x = 0; x <= WinApp->xRes-1; x++) VideoBuffer[x+vn] = 28;
+		for(int x = 0; x <= WinApp->xRes-1; x++) VideoBuffer[x+vn] = 28;
 		vn = syXlp;
-		for(y = 0; y <= 19; y++){
+		for(int y = 0; y <= 19; y++){
 			VideoBuffer[0+vn]  = 28;
 			VideoBuffer[WinApp->xRes-1+vn] = 28;
 			vn += lp;
 		}
 
-	WinApp->lpddsback->Unlock(NULL);
+	SDL_UnlockSurface(WinApp->lpddsback);
 }
 
 void LD3ENGINE::DrawLetterBox(WINAPP *WinApp)
 {
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
 	UCHAR			*VideoBuffer;
 	int				lp;
 	int				vn;
 	UCHAR			col;
 
 	
-	WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		VideoBuffer = (UCHAR *)ddsd->lpSurface;
+	SDL_LockSurface(WinApp->lpddsback);
+		VideoBuffer = (UCHAR *)WinApp->lpddsback->pixels;
 
-		lp = ddsd->lPitch;
+		lp = WinApp->lpddsback->pitch;
 		vn = 0;
 
 		for(int y = 0; y <= 39; y++){
@@ -1211,83 +1149,68 @@ void LD3ENGINE::DrawLetterBox(WINAPP *WinApp)
 		}
 		
 		vn = (WinApp->yRes-40)*lp;
-		for(y = 0; y <= 39; y++){
+		for(int y = 0; y <= 39; y++){
 			for(int x = 0; x <= WinApp->xRes; x++){
 				VideoBuffer[x+vn] = 0;
 			}
 			vn += lp;
 		}
 
-	WinApp->lpddsback->Unlock(NULL);
+	SDL_UnlockSurface(WinApp->lpddsback);
 }
 
 void LD3ENGINE::PutPixel(WINAPP *WinApp, int x, int y, int col)
 {
 	//- Place a pixel on the surface
-	//DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
-	//UCHAR			*VideoBuffer;
+	SDL_Rect area;
 
-	DDBLTFX ddbltfx;
-	RECT area;
+	area.x = x;
+	area.y = y;
+	area.w = 1;
+	area.h = 1;
 
-	area.left	= x;
-	area.right	= x+1;
-	area.top	= y;
-	area.bottom	= y+1;
-
-	memset(&ddbltfx, 0, sizeof(ddbltfx));
-	ddbltfx.dwSize = sizeof(ddbltfx);
-	ddbltfx.dwFillColor = col;
-	
-	WinApp->lpddsback->Blt(&area, NULL, NULL,  DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
-
-	/*WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		VideoBuffer = (UCHAR *)ddsd->lpSurface;
-
-		VideoBuffer[x+y*ddsd->lPitch] = col;
-	
-	WinApp->lpddsback->Unlock(NULL);*/
+	SDL_FillRect(WinApp->lpddsback, &area, col);
 }
 
 void LD3ENGINE::DrawBox(WINAPP *WinApp, int x1, int y1, int x2, int y2, int col, bool fill)
 {
 	//- Draw a filled box with the given color
-	DDSURFACEDESC2	*ddsd = &WinApp->ddsd;
+	SDL_Surface *surf = WinApp->lpddsback;
 	UCHAR			*VideoBuffer;
 	long			lp, xs, ys;
 
-	WinApp->lpddsback->Lock(NULL, ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-		VideoBuffer = (UCHAR *)ddsd->lpSurface;
+	SDL_LockSurface(surf);
+		VideoBuffer = (UCHAR *)surf->pixels;
 
 		if(fill){
-			lp = x1+y1*ddsd->lPitch;
+			lp = x1+y1*surf->pitch;
 			xs = abs(x2-x1)+1;		
 			for(int y = y1; y <= y2; y++){
 				for(int x = x1; x <= x2; x++){
 					VideoBuffer[lp] = col;
 					lp++;
 				}
-				lp += ddsd->lPitch;
+				lp += surf->pitch;
 				lp -= xs;
 			}
 		}
 		else{
-			lp = y1*ddsd->lPitch;
+			lp = y1*surf->pitch;
 			xs = abs(x2-x1)+1;
-			ys = abs(y2-y1)*ddsd->lPitch;
+			ys = abs(y2-y1)*surf->pitch;
 			for(int y = y1; y <= y2; y++){
 				VideoBuffer[lp+x1] = col;
 				VideoBuffer[lp+x2] = col;
-				lp += ddsd->lPitch;				
+				lp += surf->pitch;				
 			}
-			lp = y1*ddsd->lPitch;
+			lp = y1*surf->pitch;
 			for(int x = x1+1; x <= x2-1; x++){
 				VideoBuffer[lp+x] = col;
 				VideoBuffer[lp+ys+x] = col;
 			}
 		}
 	
-	WinApp->lpddsback->Unlock(NULL);
+	SDL_UnlockSurface(surf);
 }
 
 void LD3ENGINE::TakeScreenshot(WINAPP *WinApp)
@@ -1301,26 +1224,14 @@ void LD3ENGINE::TakeScreenshot(WINAPP *WinApp)
 
 	while(NO_ONE_CARES){
 		ScreenshotNum++;		
-		memset(Filename, 0, 80);
-		strcpy(Filename, "screenshots/shot");
-
-		memset(SSNo, 0, 8);
-		itoa(ScreenshotNum, SSNo, 10);
-		strcat(SSNo, ".bmp");
-		strcat(Filename, SSNo);
+		sprintf(Filename, "screenshots/shot%d.bmp", ScreenshotNum);
 		
-		bfile.open(Filename, ios::nocreate);
-		if(bfile.fail)
-			break;
-		else
-			bfile.close();
-			
+		//TODO(davidgow): Use stat() or similar to check if the file exists.
+		break;	
 	}
 
 	//strcpy(Filename, "screenshots/shot.bmp");
 
-	bfile.close();
-	bfile.clear();
 	bfile.open(Filename, ios::binary);
 	//bfile.open(Filename, ios::binary);
 	
@@ -1331,7 +1242,6 @@ void LD3ENGINE::TakeScreenshot(WINAPP *WinApp)
 	int			r2;
 	int			r3;
 	int			size;
-	DDSURFACEDESC2		ddsd;			// Holds the DirectDraw surface description
 	
 	bfile.put('B');
 	bfile.put('M');
@@ -1394,29 +1304,27 @@ void LD3ENGINE::TakeScreenshot(WINAPP *WinApp)
 	// save palette data
 	for(int i = 0; i <= 255; i++)
 	{
-		ch = WinApp->palette[i].peBlue;		bfile.put(ch);
-		ch = WinApp->palette[i].peGreen;	bfile.put(ch);
-		ch = WinApp->palette[i].peRed;		bfile.put(ch);
-		ch = NULL;	bfile.put(ch);
+		ch = WinApp->palette[i].b;		bfile.put(ch);
+		ch = WinApp->palette[i].g;	bfile.put(ch);
+		ch = WinApp->palette[i].r;		bfile.put(ch);
+		ch = 0;	bfile.put(ch);
 		fcount += 4;
 	}
 
 	// save image data
-	memset((void *)&ddsd, 0, sizeof(ddsd));
-	ddsd.dwSize				= sizeof(ddsd);
-	WinApp->lpddsback->Lock(NULL, &ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT, NULL);
-	VideoBuffer = (UCHAR *)ddsd.lpSurface;
-	WinApp->lpddsback->Unlock(NULL);
+	SDL_LockSurface(WinApp->lpddsback);
+	VideoBuffer = (UCHAR *)WinApp->lpddsback->pixels;
 	for(int y = yRes-1; y >= 0; y--)
 	{
 		for(int x = 0; x <= xRes-1; x++)
 		{
-			ch = VideoBuffer[x + y*ddsd.lPitch];
+			ch = VideoBuffer[x + y*WinApp->lpddsback->pitch];
 			bfile.seekp(fcount);
 			bfile.put(ch);
 			fcount++;
 		}		
 	}
+	SDL_UnlockSurface(WinApp->lpddsback);
 	
 	bfile.close();	
 }
@@ -1425,8 +1333,8 @@ void LD3ENGINE::FadeIn(WINAPP *WinApp)
 {
 /*	bool PaletteChange;
 	long TickCount;
-	PALETTEENTRY FadePalette[256];
-	memset(FadePalette, 0, sizeof(PALETTEENTRY)*256);
+	SDL_Color FadePalette[256];
+	memset(FadePalette, 0, sizeof(SDL_Color)*256);
 
 	PaletteChange = true;
 	while(PaletteChange)
@@ -1439,9 +1347,9 @@ void LD3ENGINE::FadeIn(WINAPP *WinApp)
 		
 		PaletteChange = false;
 		for(int n = 0; n <= 255; n++){
-			if(FadePalette[n].peRed < WinApp->palette[n].peRed){FadePalette[n].peRed += 1; PaletteChange = true;}
-			if(FadePalette[n].peGreen < WinApp->palette[n].peGreen){FadePalette[n].peGreen += 1; PaletteChange = true;}
-			if(FadePalette[n].peBlue < WinApp->palette[n].peBlue){FadePalette[n].peBlue += 1; PaletteChange = true;}
+			if(FadePalette[n].r < WinApp->palette[n].r){FadePalette[n].r += 1; PaletteChange = true;}
+			if(FadePalette[n].g < WinApp->palette[n].g){FadePalette[n].g += 1; PaletteChange = true;}
+			if(FadePalette[n].b < WinApp->palette[n].b){FadePalette[n].b += 1; PaletteChange = true;}
 		}
 
 		while(GetTickCount()-TickCount < 1.3f);
@@ -1459,8 +1367,8 @@ void LD3ENGINE::FadeOut(WINAPP *WinApp)
 {
 	/*bool PaletteChange;
 	long TickCount;
-	PALETTEENTRY FadePalette[256];
-	memcpy(&FadePalette, WinApp->palette, sizeof(PALETTEENTRY)*256);
+	SDL_Color FadePalette[256];
+	memcpy(&FadePalette, WinApp->palette, sizeof(SDL_Color)*256);
 
 	PaletteChange = true;
 	while(PaletteChange)
@@ -1473,9 +1381,9 @@ void LD3ENGINE::FadeOut(WINAPP *WinApp)
 		
 		PaletteChange = false;
 		for(int n = 0; n <= 255; n++){
-			if(FadePalette[n].peRed > 0){FadePalette[n].peRed -= 1; PaletteChange = true;}
-			if(FadePalette[n].peGreen > 0){FadePalette[n].peGreen -= 1; PaletteChange = true;}
-			if(FadePalette[n].peBlue > 0){FadePalette[n].peBlue -= 1; PaletteChange = true;}
+			if(FadePalette[n].r > 0){FadePalette[n].r -= 1; PaletteChange = true;}
+			if(FadePalette[n].g > 0){FadePalette[n].g -= 1; PaletteChange = true;}
+			if(FadePalette[n].b > 0){FadePalette[n].b -= 1; PaletteChange = true;}
 		}
 
 		while(GetTickCount()-TickCount < 1.3f);
@@ -1488,5 +1396,6 @@ void LD3ENGINE::FadeOut(WINAPP *WinApp)
 void LD3ENGINE::WaitForRetrace(WINAPP *WinApp)
 {
 	//WinApp->lpddsprimary->WaitForVerticalBlank(DDWAITVB_BLOBKBEGIN, NULL);
-	WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
+	//WinApp->lpdd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
+	//TODO(davidgow): implement
 }
