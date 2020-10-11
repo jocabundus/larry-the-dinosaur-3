@@ -1,30 +1,45 @@
 cmake_minimum_required(VERSION 3.2)
 
-project(slx_win32)
+project(ld3sdl)
+
+option(WITH_FMOD "Build against fmod/libfmod-3.75.so instead of SDL2_mixer" OFF)
+
+option(FORCE32 "Cross-compile a 32-bit version even on 64-bit machines" OFF)
+
+if("${CMAKE_SYSTEM}" MATCHES "Linux")
+	set(TARGET_OS_LINUX ON)
+endif()
+
+if(FORCE32)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+endif()
+
+if(TARGET_OS_LINUX)
+	if(CMAKE_SIZEOF_VOID_P MATCHES "8" AND NOT(FORCE32))
+		set(BIN_LIBROOT "x86_64")
+		set(CMAKE_EXECUTABLE_SUFFIX ".x86_64")
+		set(BIN_RPATH "\$ORIGIN/x86_64")
+	else()
+		set(BIN_LIBROOT "x86")
+		set(CMAKE_EXECUTABLE_SUFFIX ".x86")
+		set(BIN_RPATH "\$ORIGIN/x86")
+	endif()
 
 
-SET(LINUXLIB_PATH
-    "/home/david/builds/libs"
-    CACHE PATH "Location of private builds of linux libraries"
-)
+	set(CMAKE_SKIP_BUILD_RPATH TRUE)
+	set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+	set(CMAKE_INSTALL_RPATH ${BIN_RPATH})
+	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
-link_directories(
-    ${LINUXLIB_PATH}/libs-32
-)
-include_directories(
-    ${LINUXLIB_PATH}/include
-    ${LINUXLIB_PATH}/include/SDL2
-)
+else()
+	#TODO: Support non-Linux setups
+endif()
 
-set(BIN_LIBROOT "x86")
-set(BIN_SUFFIX ".x86")
-set(BIN_RPATH "\$ORIGIN")
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+find_package(SDL2 REQUIRED)
 
-set(CMAKE_SKIP_BUILD_RPATH TRUE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH ${BIN_RPATH})
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
+include_directories(${SDL2_INCLUDE_DIR})
 
 add_executable(ld3
 	entity.cpp
@@ -34,9 +49,12 @@ add_executable(ld3
 	winapp.cpp
 	#	winproc.cpp
 )
-if(DEFINED WITH_FMOD)
+target_link_libraries(ld3 ${SDL2_LIBRARY})
+if(WITH_FMOD)
 	target_link_libraries(ld3 ${CMAKE_SOURCE_DIR}/fmod/libfmod-3.75.so)
 else()
-	target_link_libraries(ld3 SDL2_mixer)
+	find_package(SDL2_mixer REQUIRED)
+	include_directories(${SDL2_MIXER_INCLUDE_DIR})
+	target_link_libraries(ld3 ${SDL2_MIXER_LIBRARY})
 endif()
-target_link_libraries(ld3 SDL2)
+
