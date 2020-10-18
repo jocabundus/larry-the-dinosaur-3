@@ -10,7 +10,8 @@ Is it playable?
 Yes, but…
 
 Larry the Dinosaur 3 was never finished, and this version was not polished for
-release: there are a number of bugs and some missing files (e.g., sounds).
+release: there are a number of bugs still present, and a few more added during
+the porting process.
 
 That being said, it's possible to play through most of the levels, and it's
 still quite a bit of fun!
@@ -67,7 +68,6 @@ There are a quite a few known bugs in LD3SDL.
 Here are some highlights (lowlights?):
 
 * The "no move" key is broken, and hence disabled.
-* There are no sound effects (the files are missing)
 * Level names in saved games may be off-by-one?
 * There's no Joystick/Gamepad support.
 * There are quite a few hangs/crashes.
@@ -89,7 +89,10 @@ cd ..
 
 You'll need ``SDL2`` and ``SDL2_mixer`` installed, including the development headers.
 
-(On Debian/Ubuntu: ``sudo apt install libsdl2-dev libsdl2-mixer-dev``
+(On Debian/Ubuntu: ``sudo apt install libsdl2-dev libsdl2-mixer-dev``)
+
+Note that the version of ``SDL2_mixer`` you have will need to be compiled with
+MOD and MP3 support for the sounds and music to load.
 
 Who owns Larry the Dinosaur 3?
 ------------------------------
