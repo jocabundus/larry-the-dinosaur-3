@@ -5,18 +5,20 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <windows.h>
-#include <ddraw.h>
-#include <dinput.h>
-#include <objbase.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
+using namespace std;
 #include <math.h>
-//#include <commdlg.h>
+#include "slx_win32types.h"
 #include "defines.h"
 #include "winapp.h"
 #include "ld3.h"
 #include "entity.h"
-#include "fmod.h"
+#ifdef WITH_FMOD
+#include "fmod/inc/fmod.h"
+#else
+#include "fake_fmod.h"
+#endif
 #include "time.h"
 
 #endif

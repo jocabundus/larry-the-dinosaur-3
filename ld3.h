@@ -13,16 +13,16 @@ public:
 							LD3ENGINE();
 							~LD3ENGINE();
 
-			void			LoadPalette(WINAPP *WinApp, char* Filename);
-			void			LoadTileSet(WINAPP *WinApp, char* Filename, int start);
-			void			LoadFont(char* Filename);
+			void			LoadPalette(WINAPP *WinApp, const char* Filename);
+			void			LoadTileSet(WINAPP *WinApp, const char* Filename, int start);
+			void			LoadFont(const char* Filename);
 			void			LoadMap(WINAPP *WinApp);
-			void			LoadMap(char* Filename);
-			void			LoadSprite(WINAPP *WinApp, char* Filename, int Num, int start);
+			void			LoadMap(const char* Filename);
+			void			LoadSprite(WINAPP *WinApp, const char* Filename, int Num, int start);
 			void			DrawMap(WINAPP *WinApp, int xShift, int yShift, int layer, float diff);
 			void			FlipSurfaces(WINAPP *WinApp);
 			void			PutSprite(WINAPP *WinApp, int x, int y, int Num, int Tile, bool xFlip);			
-			void			LoadSky(WINAPP *WinApp, char* Filename, int pos, int Convert);
+			void			LoadSky(WINAPP *WinApp, const char* Filename, int pos, int Convert);
 			void			DrawSky(WINAPP *WinApp, int xShift, int yShift);
 			void			SetSkyScroll(int yStart, int yEnd, int ShiftNum);
 			void			WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center, bool trans);
@@ -32,8 +32,8 @@ public:
 			void			DrawBox(WINAPP *WinApp, int x1, int y1, int x2, int y2, int col, bool fill);
 			void			TakeScreenshot(WINAPP *WinApp);
 			void			DrawLetterBox(WINAPP *WinApp);
-			void			LoadMapIcon(WINAPP *WinApp, char *Filename, int x, int y);
-			void			LoadSplashScreen(WINAPP *WinApp, char *Filename, int delay);
+			void			LoadMapIcon(WINAPP *WinApp, const char *Filename, int x, int y);
+			void			LoadSplashScreen(WINAPP *WinApp, const char *Filename, int delay);
 			void			ClearBuffer(WINAPP *WinApp, int col);
 			void			FadeIn(WINAPP *WinApp);
 			void			FadeOut(WINAPP *WinApp);
