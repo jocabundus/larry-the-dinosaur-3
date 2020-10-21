@@ -11,7 +11,7 @@
 class LD3ENGINE
 {
 public:
-							LD3ENGINE();
+							LD3ENGINE(WINAPP *WinApp);
 							~LD3ENGINE();
 
 			void			LoadPalette(WINAPP *WinApp, const char* Filename);
@@ -62,6 +62,7 @@ public:
 			bool WindowResized;
 			RECT ClipArea;
 private:
+            WINAPP          *_winApp;
 };
 
 #endif

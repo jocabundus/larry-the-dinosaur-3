@@ -11,10 +11,10 @@ using namespace std;
 #include "ld3.h"
 #include "winapp.h"
 
-LD3ENGINE::LD3ENGINE()
+LD3ENGINE::LD3ENGINE(WINAPP *WinApp)
 {
-	//- Initialize
-	//------------
+    this->_winApp = WinApp;
+    
 	MaxTiles	  = 0;
 	MapWidth	  = MAPWIDTH;
 	MapHeight	  = MAPHEIGHT;
@@ -30,6 +30,8 @@ LD3ENGINE::LD3ENGINE()
 	
 	Map = (int*)calloc(220000, sizeof(int));
 	//ZeroMemory(&Map, sizeof(Map));
+    
+    // TODO set default palette
 }
 
 LD3ENGINE::~LD3ENGINE()
@@ -39,32 +41,31 @@ LD3ENGINE::~LD3ENGINE()
 
 void LD3ENGINE::LoadPalette(WINAPP *WinApp, const char* Filename)
 {
-	//- Load the palette
-	//------------------
-
-	ifstream PalFile(Filename, ios::binary);
+    ifstream PalFile(Filename, ios::binary);
+    if(!PalFile.is_open())
+    {
+        char errmsg[] = "Unable to open palette file: ";
+        SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, Filename), this->_winApp->hwnd);
+		return;
+    }
+    
 	SDL_Color	*palette;
 	char			ch;	
 	
 	palette = &WinApp->palette[0];
-	
-	for(int i = 0; i <= 255; i++)
-	{
-		PalFile.get(ch); palette[i].r	= ch*4;
-		PalFile.get(ch); palette[i].g	= ch*4;
-		PalFile.get(ch); palette[i].b	= ch*4;
-		palette[i].a = 255;
-		
-	}
-	
-	PalFile.close();	
+    for(int i = 0; i <= 255; i++)
+    {
+        PalFile.get(ch); palette[i].r	= ch*4;
+        PalFile.get(ch); palette[i].g	= ch*4;
+        PalFile.get(ch); palette[i].b	= ch*4;
+        palette[i].a = 255;
+        
+    }
+    PalFile.close();
 }
 
 void LD3ENGINE::LoadTileSet(WINAPP *WinApp, const char* Filename, int start)
 {
-	//- Load the tile sprites
-	//-----------------------
-
 	SDL_Surface		*surf;
 	UCHAR			*TileBuffer;
 	long			lp;
@@ -76,7 +77,8 @@ void LD3ENGINE::LoadTileSet(WINAPP *WinApp, const char* Filename, int start)
 
 	if (!SpriteFile.is_open())
 	{
-		SDL_ShowSimpleMessageBox(0, "Error", "Unable to open file.", WinApp->hwnd);
+        char errmsg[] = "Unable to open tileset file: ";
+		SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, Filename), this->_winApp->hwnd);
 		return;
 	}
 	
@@ -97,13 +99,6 @@ void LD3ENGINE::LoadTileSet(WINAPP *WinApp, const char* Filename, int start)
 			for(int x = 0; x <= 19; x++)
 			{
 				SpriteFile.get(ch);
-				//sTiles[x+y*20][n] = ch;
-				//TileBuffer[n*20+x+y*ddsd->lPitch] = ch;
-				//if(start >= 160)
-				//	tl = n-160;
-				//else
-				//	tl = n;
-				//tl = n % 160;
 				TileBuffer[((tl&15)*20)+x+(y+((tl>>4)*20))*surf->pitch] = ch;
 			}
 		}
@@ -169,6 +164,12 @@ void LD3ENGINE::LoadMap(const char* Filename)
 	int				m;
 	
 	ifstream MapFile(Filename, ios::binary);
+    if (!MapFile.is_open())
+	{
+        char errmsg[] = "Unable to open map file: ";
+		SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, Filename), this->_winApp->hwnd);
+		return;
+	}
 	
 	for(int ml = 0; ml <= 3; ml++)
 	{
@@ -205,9 +206,6 @@ void LD3ENGINE::LoadMap(const char* Filename)
 
 void LD3ENGINE::LoadSprite(WINAPP *WinApp, const char* Filename, int Num, int start)
 {
-	//- Load a character sprite file
-	//------------------------------
-
 	SDL_Surface *surf;
 	UCHAR			*SpriteBuffer;
 	char			ch;
@@ -215,6 +213,12 @@ void LD3ENGINE::LoadSprite(WINAPP *WinApp, const char* Filename, int Num, int st
 	long			lp;
 
 	ifstream SpriteFile(Filename, ios::binary);
+    if (!SpriteFile.is_open())
+	{
+        char errmsg[] = "Unable to open sprite file: ";
+		SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, Filename), this->_winApp->hwnd);
+		return;
+	}
 	
 	SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
 	SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
@@ -232,8 +236,6 @@ void LD3ENGINE::LoadSprite(WINAPP *WinApp, const char* Filename, int Num, int st
 				for(int x = 0; x <= 19; x++)
 				{
 					SpriteFile.get(ch);
-					//Sprite[x+y*20][n][Num] = ch;
-					//SpriteBuffer[Num*1600+n*20+x+y*ddsd->lPitch] = ch;
 					SpriteBuffer[((n&15)*20)+x+(y+((n>>4)*20))*surf->pitch] = ch;					
 				}
 			}
@@ -246,13 +248,16 @@ void LD3ENGINE::LoadSprite(WINAPP *WinApp, const char* Filename, int Num, int st
 
 void LD3ENGINE::LoadFont(const char* Filename)
 {
-	//- Load a character sprite file
-	//------------------------------
-
 	char			ch;
 	int				n = 0;
 
 	ifstream SpriteFile(Filename, ios::binary);
+    if (!SpriteFile.is_open())
+	{
+        char errmsg[] = "Unable to open font file: ";
+		SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, Filename), this->_winApp->hwnd);
+		return;
+	}
 	
 	SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
 	SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
@@ -260,7 +265,6 @@ void LD3ENGINE::LoadFont(const char* Filename)
 	while(!SpriteFile.eof())
 	{
 		SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch); SpriteFile.get(ch);
-		//SpriteFile.get(ch); SpriteFile.get(ch);
 
 		for(int y = 0; y <= 4; y++)
 		{
@@ -285,7 +289,6 @@ void LD3ENGINE::ClearBuffer(WINAPP *WinApp, int col)
 
 void LD3ENGINE::DrawSky(WINAPP *WinApp, int xShift, int yShift)
 {
-	//- Draw the sky
 	UCHAR			*VideoBuffer;
 	long			lp;
 	static int		CloudCount = 0;
@@ -351,9 +354,6 @@ void LD3ENGINE::DrawSky(WINAPP *WinApp, int xShift, int yShift)
 
 void LD3ENGINE::DrawMap(WINAPP *WinApp, int xShift, int yShift, int layer, float diff)
 {
-	//- Draw the map onto the screen
-	//------------------------------
-
 	UCHAR			*VideoBuffer;
 	int				mx, my, ml;
 	int				cx, cy;
@@ -623,14 +623,18 @@ void LD3ENGINE::PutSprite(WINAPP *WinApp, int x, int y, int Num, int Tile, bool 
 
 void LD3ENGINE::LoadMapIcon(WINAPP *WinApp, const char *Filename, int x, int y)
 {
-	//- Load a map icon
-
 	SDL_Surface *surf;
 	UCHAR			*VideoBuffer;
 	long			lp;
 	char  ch;
 
 	ifstream BitmapFile(Filename, ios::binary);	
+    if (!BitmapFile.is_open())
+	{
+        char errmsg[] = "Unable to open icon file: ";
+		SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, Filename), this->_winApp->hwnd);
+		return;
+	}
 
 	BitmapFile.seekg(1078);
 
@@ -670,6 +674,12 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, const char* Filename, int delay
 	int				xadd;
 
 	ifstream BitmapFile(Filename, ios::binary);	
+    if (!BitmapFile.is_open())
+	{
+        char errmsg[] = "Unable to open splash screen file: ";
+		SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, Filename), this->_winApp->hwnd);
+		return;
+	}
 
 	BitmapFile.seekg(54);
 
@@ -900,8 +910,6 @@ void LD3ENGINE::LoadSplashScreen(WINAPP *WinApp, const char* Filename, int delay
 
 void LD3ENGINE::LoadSky(WINAPP *WinApp, const char* Filename, int pos, int Convert)
 {
-	//- Load the sky
-
 	char  ch;
 	char  ConvertTable[256];
 	byte  red, grn, blu;
@@ -912,6 +920,13 @@ void LD3ENGINE::LoadSky(WINAPP *WinApp, const char* Filename, int pos, int Conve
 
 
 	ifstream BitmapFile(Filename, ios::binary);
+    if (!BitmapFile.is_open())
+	{
+        char errmsg[] = "Unable to open background image file: ";
+		SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, Filename), this->_winApp->hwnd);
+        // TODO generate default background
+		return;
+	}
 
 	
 	if(Convert == 0)
@@ -1239,6 +1254,12 @@ void LD3ENGINE::TakeScreenshot(WINAPP *WinApp)
 	//strcpy(Filename, "screenshots/shot.bmp");
 
 	bfile.open(Filename, ios::binary);
+    if (!bfile.is_open())
+	{
+        char errmsg[] = "Unable to open screenshot file: ";
+		SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, Filename), this->_winApp->hwnd);
+		return;
+	}
 	//bfile.open(Filename, ios::binary);
 	
 	//ofstream bfile(Filename);

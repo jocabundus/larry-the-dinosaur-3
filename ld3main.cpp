@@ -383,7 +383,7 @@ bool				LockInput = false;			//- if this flag is set to false, the game input wi
 //- other (classes/trig tables/etc)
 //----------------------------------------------------------------------------------------------------------------------------
 WINAPP				WinApp;						//- This class contains the primitives such as surfaces, palettes, etc.
-LD3ENGINE			LD3;						//- This class contains all the drawing functions
+LD3ENGINE			LD3(&WinApp);				//- This class contains all the drawing functions
 float				Cosine[500], Sine[500];		//- Predefines cosine and sine tables for faster calculation
 bool				EndGame = false;			//- the game will exit if this is false
 SDL_Event  msg;										//- holds the windows messages
@@ -581,6 +581,7 @@ void Init()
 		LD3.LoadFont("gfx/font1.put");
 
 		//- Load and set the palette
+            strcpy(PaletteFilename, "gfx/palettes/grad.pal");
 			LD3.LoadPalette(&WinApp, PaletteFilename);	
 			WinApp.CreatePalette();
 			WinApp.SetPalette();
@@ -729,7 +730,8 @@ void Init()
 		int  n = 0;
 		char word1[40], word2[40];
 		char *lv, *dt;
-		ifstream lfile("maps/levellist.dat", ios::binary);			
+		ifstream lfile("maps/levellist.dat", ios::binary);
+        if(lfile.is_open()) {
 			while(NO_ONE_CARES){
 
 				memset(word1, 0, 40);
@@ -748,7 +750,11 @@ void Init()
 				strcat(lv, word1);   strcat(dt, word1);
 				strcat(lv, ".map");  strcat(dt, ".dat");
 			}
-		lfile.close();
+            lfile.close();
+        } else {
+            char errmsg[] = "Unable to open level-list file: ";
+            SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, "maps/levellist.dat"), WinApp.hwnd);
+        }
 
 	//- load in the controls
 			//TODO(davidgow): Load Controls
@@ -756,6 +762,7 @@ void Init()
 		ifstream sfile;
 
 		sfile.open("controls.dat", ios::binary);
+        if(sfile.is_open()) {
 
 			sfile.get(keyJump);
 			sfile.get(keyJump2);
@@ -778,7 +785,8 @@ void Init()
 			sfile.get(joyNoMove);
 			sfile.get(dpad);
 
-		sfile.close();
+            sfile.close();
+        }
 #endif
 }
 
@@ -10876,7 +10884,7 @@ void NextLevel(int level)
 	//------------------------------------------------
 	//- Read the level attributes
 	//------------------------------------------------
-		if(Level > -1){
+    if(Level > -1){
 		/*itoa(Level, text, 10);
 		memset(ScriptFilename, 0, 80);
 
@@ -10887,6 +10895,7 @@ void NextLevel(int level)
 		WriteMessage(ScriptFilename);*/
 
 		ifstream mfile(&LevelData[Level*80], ios::binary);
+        if(mfile.is_open()) {
 		
 			memset(word1, 0, 20);
 			memset(word2, 0, 20);
@@ -11025,7 +11034,12 @@ void NextLevel(int level)
 
 
 			mfile.close();
-		}
+        } else {
+            char errmsg[] = "Unable to open map file: ";
+            SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, &LevelData[Level*80]), WinApp.hwnd);
+            // TODO gracefully exit to game menu
+        }
+    }
 	//------------------------------------------------
 	//- End reading level attributes
 	//------------------------------------------------
@@ -12069,7 +12083,7 @@ void mnuScores()
 
 	//- Load in the scorefile
 	ScoreFile.open("save/hiscores.txt", ios::binary);
-
+    if(ScoreFile.is_open()) {
 		//- get the initials
 		memset(Initial, 0, 40);
 		for(int i = 1; i <= 10; i++)			
@@ -12077,11 +12091,15 @@ void mnuScores()
 		//- get the scores
 		memset(HiScore, 0, 200);
 		for(int i = 1; i <= 10; i++){
-			//score = ReadValue(&ScoreFile);			
-			//itoa(score, &Score[i*20], 10);
 			ReadWord(&ScoreFile, &HiScore[i*20]);
 		}
-	ScoreFile.close();
+        ScoreFile.close();
+    } else {
+        for(int i = 1; i <= 10; i++){
+			strcpy(&Initial[i*4], "---");
+            strcpy(&HiScore[i*20], "------");
+		}
+    }
 
 	while(NO_ONE_CARES)
 	{
@@ -12209,7 +12227,7 @@ void EnterHiScore()
 
 	//- Load in the scorefile
 	ScoreFile.open("save/hiscores.txt", ios::binary);
-
+    if(ScoreFile.is_open()) {
 		//- get the initials
 		memset(Initial, 0, 100);
 		for(int i = 0; i <= 9; i++)			
@@ -12217,7 +12235,10 @@ void EnterHiScore()
 		//- get the scores		
 		for(int i = 0; i <= 9; i++)
 			HiScore[i] = ReadValue(&ScoreFile);
-	ScoreFile.close();
+        ScoreFile.close();
+    } else {
+        // TODO log debug
+    }
 
 	//- Check if the player's score is within the hiscores
 
@@ -12319,7 +12340,7 @@ void EnterHiScore()
 		
 		//- save the score data
 		ScoreFile2.open("save/hiscores.txt", ios::binary);
-
+        if(ScoreFile2.is_open()) {
 			//- write the initials
 			//memset(Initial, 0, 40);
 			for(int i = 0; i <= 9; i++)				
@@ -12329,8 +12350,11 @@ void EnterHiScore()
 				sprintf(&cHiScore[i*20], "%d", HiScore[i]);
 				PutString(&ScoreFile2, &cHiScore[i*20]);
 			}
-
-		ScoreFile2.close();
+            ScoreFile2.close();
+        } else {
+            char errmsg[] = "Unable to open scores file: ";
+            SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, "save/hiscores.txt"), WinApp.hwnd);
+        }
 		Score = 0;
 		mnuScores();
 	}
@@ -13195,6 +13219,7 @@ void mnuControls()
 				ofstream sfile;
 
 				sfile.open("controls.dat", ios::binary);
+                if(sfile.is_open()) {
 
 					sfile.put(keyJump);
 					sfile.put(keyJump2);
@@ -13217,7 +13242,8 @@ void mnuControls()
 					sfile.put(joyNoMove);
 					sfile.put(dpad);
 
-				sfile.close();
+                    sfile.close();
+                }
 				
 				break;
 			}
@@ -13369,7 +13395,7 @@ bool mnuChooseSlot(bool Loading)
 		sprintf(Filename, "save/slot%d.txt", i);
 
 		sfile.open(Filename, ios::binary);
-		
+		if(sfile.is_open()) {
 			while(NO_ONE_CARES)
 			{
 				memset(Word, 0, 20);
@@ -13394,8 +13420,10 @@ bool mnuChooseSlot(bool Loading)
 				}
 
 			}
-		
-		sfile.close();
+            sfile.close();
+        } else {
+            SaveData[i].Empty = true;
+        }
 	}
 
 	while(NO_ONE_CARES)
@@ -13676,6 +13704,7 @@ void SaveGame()
 
 	ofstream sfile;
 	sfile.open(Filename, ios::binary);
+    if(sfile.is_open()) {
 	
 		memset(Word, 0, 20); memset(Num, 0, 20);
 		sprintf(Word, "Level %d", Level);
@@ -13714,7 +13743,11 @@ void SaveGame()
 		memset(Word, 0, 20); strcpy(Word, "END");
 		PutString(&sfile, Word);
 
-	sfile.close();
+        sfile.close();
+    } else {
+        char errmsg[] = "Unable to open save file: ";
+        SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, Filename), WinApp.hwnd);
+    }
 }
 
 void PutString(ofstream *File, char *Text)
