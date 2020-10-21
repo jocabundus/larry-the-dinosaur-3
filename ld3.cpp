@@ -399,7 +399,7 @@ void LD3ENGINE::DrawMap(WINAPP *WinApp, int xShift, int yShift, int layer, float
 				else
 					ani = Map[myys+165000];
 				
-				tile = Map[myys+mlt] + ((long)Animation % ani);
+				tile = Map[myys+mlt] + ((ani != 0) ? ((long)Animation % ani) : 0);
 
 				if(tile < 160){
 					
