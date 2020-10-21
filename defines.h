@@ -1,6 +1,8 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+#include "slx_win32types.h"
+
 #define		LARRY			1985
 #define		NO_ONE_CARES	1
 #define		PI				3.141592654

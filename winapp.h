@@ -5,8 +5,8 @@
 #ifndef WINAPP_H
 #define WINAPP_H
 
-//#include "main.h"
-#include <SDL.h>
+#include "SDL2/SDL.h"
+#include "slx_win32types.h"
 
 class WINAPP
 {

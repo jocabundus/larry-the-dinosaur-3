@@ -1,7 +1,7 @@
 #ifndef FAKE_FMOD_H
 #define FAKE_FMOD_H
 
-#include <SDL_mixer.h>
+#include "SDL2/SDL_mixer.h"
 
 #define FSOUND_SAMPLE Mix_Chunk
 #define FMUSIC_MODULE Mix_Music

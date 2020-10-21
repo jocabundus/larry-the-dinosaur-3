@@ -5,7 +5,8 @@
 #ifndef LD3_H
 #define LD3_H
 
-//#include "main.h"
+#include "slx_win32types.h"
+#include "winapp.h"
 
 class LD3ENGINE
 {

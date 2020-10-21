@@ -2,7 +2,10 @@
 //- November, 2002 - Created by Joe King
 //=====================================================
 
-#include "main.h"
+//#include "main.h"
+#include <math.h>
+#include "defines.h"
+#include "entity.h"
 
 ENTITY::ENTITY()
 {

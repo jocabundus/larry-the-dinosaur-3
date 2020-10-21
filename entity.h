@@ -5,7 +5,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-//#include "main.h"
+#include "slx_win32types.h"
 
 class ENTITY
 {

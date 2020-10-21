@@ -8,7 +8,17 @@
 //- 4.9/0.125 = 39.2 - Larry Falls 39.2 pixels per second
 //- 39.2/60fps = 0.653333
 
-#include "main.h"
+//#include "main.h"
+using namespace std;
+#include <math.h>
+#include <time.h>
+#include <fstream>
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_mixer.h"
+#include "fake_fmod.h"
+#include "defines.h"
+#include "entity.h"
+#include "ld3.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------------

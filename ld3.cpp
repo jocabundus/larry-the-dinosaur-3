@@ -3,7 +3,13 @@
 //===========================================
 
 //#include "ld3.h"
-#include "main.h"
+//#include "main.h"
+using namespace std;
+#include <fstream>
+#include "SDL2/SDL.h"
+#include "defines.h"
+#include "ld3.h"
+#include "winapp.h"
 
 LD3ENGINE::LD3ENGINE()
 {

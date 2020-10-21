@@ -2,8 +2,10 @@
 //- November 22, 2002 - Created by Joe King
 //================================================================
 
-//#include "winapp.h"
-#include "main.h"
+#include <iostream>
+#include "SDL2/SDL.h"
+#include "slx_win32types.h"
+#include "winapp.h"
 
 WINAPP::WINAPP()
 {
