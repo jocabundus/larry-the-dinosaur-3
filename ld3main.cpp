@@ -13447,7 +13447,7 @@ bool mnuChooseSlot(bool Loading)
 				LD3.PutSprite(&WinApp, 19, top+4, 0, 9, false);
 				
 				memset(Word, 0, 20); memset(Desc, 0, 40);
-				sprintf(Desc, "LEVEL %d", SaveData[i].Level);
+				sprintf(Desc, "LEVEL %d", SaveData[i].Level+1);
 				//LD3.WriteText(&WinApp, 85, top, Desc, false, 15, true);
 				WriteText(85, top, Desc, 15, 0);
 
@@ -13468,21 +13468,26 @@ bool mnuChooseSlot(bool Loading)
 				//LD3.WriteText(&WinApp, 195, top, Desc, false, 15, true);
 				WriteText(195, top, Desc, 15, 0);
 				
-				if(SaveData[i].Level == 1) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/spikevalley.bmp", 39, top-3);
-				if(SaveData[i].Level == 2) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/fallevening.bmp", 39, top-3);
-				if(SaveData[i].Level == 3) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/oceandrop.bmp", 39, top-3);
-				if(SaveData[i].Level == 4) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/shinyforest.bmp", 39, top-3);
-				if(SaveData[i].Level == 6) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/frostbite.bmp", 39, top-3);
+                if(SaveData[i].Level == 0) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/homebase.bmp", 39, top-3);
+                if(SaveData[i].Level == 1) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/vents.bmp", 39, top-3);
+				if(SaveData[i].Level == 2) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/spikevalley.bmp", 39, top-3);
+				if(SaveData[i].Level == 3) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/fallevening.bmp", 39, top-3);
+				if(SaveData[i].Level == 4) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/oceandrop.bmp", 39, top-3);
+				if(SaveData[i].Level == 5) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/shinyforest.bmp", 39, top-3);
+                if(SaveData[i].Level == 6) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/crossways.bmp", 39, top-3);
+				if(SaveData[i].Level == 7) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/frostbite.bmp", 39, top-3);
+                if(SaveData[i].Level == 8) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/otherworld.bmp", 39, top-3);
 
 				if(SaveData[i].Level == 0) WriteText(220, top, "Home Base", 15, 0);
-				if(SaveData[i].Level == 1) WriteText(220, top, "Spike Valley", 15, 0);
-				if(SaveData[i].Level == 2) WriteText(220, top, "Fall Evening", 15, 0);
-				if(SaveData[i].Level == 3) WriteText(220, top, "Treatment", 15, 0);
-				if(SaveData[i].Level == 4) WriteText(220, top, "Shiny Forest", 15, 0);
-				if(SaveData[i].Level == 5) WriteText(220, top, "Crossways", 15, 0);
-				if(SaveData[i].Level == 6) WriteText(220, top, "Frostbite", 15, 0);
-				if(SaveData[i].Level == 7) WriteText(220, top, "Other World", 15, 0);
-				if(SaveData[i].Level == 8) WriteText(220, top, "The End", 15, 0);
+                if(SaveData[i].Level == 1) WriteText(220, top, "Ventilation", 15, 0);
+				if(SaveData[i].Level == 2) WriteText(220, top, "Spike Valley", 15, 0);
+				if(SaveData[i].Level == 3) WriteText(220, top, "Fall Evening", 15, 0);
+				if(SaveData[i].Level == 4) { WriteText(220, top, "Water", 15, 0); WriteText(220, top+10, "Treatment", 15, 0); WriteText(220, top+20, "Plant", 15, 0); }
+				if(SaveData[i].Level == 5) { WriteText(220, top, "The Shiny", 15, 0); WriteText(220, top+10, "Forest", 15, 0); }
+				if(SaveData[i].Level == 6) { WriteText(220, top, "Aqueduct", 15, 0); WriteText(220, top+10, "Crossways", 15, 0); }
+				if(SaveData[i].Level == 7) WriteText(220, top, "Frostbite", 15, 0);
+				if(SaveData[i].Level == 8) { WriteText(220, top, "The Other", 15, 0); WriteText(220, top+10, "World", 15, 0); }
+				if(SaveData[i].Level == 9) WriteText(220, top, "The End", 15, 0);
 				/*if(SaveData[i].Shotgun)
 					LD3.PutSprite(&WinApp, 240, top+2, ICON_SPRITE_SET, iconShotgun, false);
 				else
