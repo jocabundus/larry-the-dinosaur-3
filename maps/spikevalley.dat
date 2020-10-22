@@ -2,7 +2,7 @@ palette:  "grada.pal"
 tileset:  "ld3tile1.put"
 objset:   "ld3objs1.put"
 objname:  "mushrooms"
-music:    "frogs.it"
+music:    "spikevalley.it"
 backgrnd: "spikevalley.bmp"
 message:  "Spike Valley"
 
