@@ -25,6 +25,7 @@ using namespace std;
 //----------------------------------------------------------------------------------------------------------------------------
 //- Functions
 //----------------------------------------------------------------------------------------------------------------------------
+void generateDefaultScores(char* initials, char* scores);
 bool ProcessInput();				//- takes in the input and processes what's needed based on the input
 void RenderScene();					//- draws the environment, entities, etc
 void ProcessItems();				//- the main function for processing entities, timers, etc
@@ -69,7 +70,7 @@ void SaveGame();							//- save the game in the Slot
 void PutString(ofstream *File, char *Text);	//- write the given text into the given file
 void DetonateExplosives();					//- detonate the explosives on the map
 void SetDefaultValue(ENTITY *Entity);		//- set the default values for the given entity
-void EnterHiScore();						//- check if the score is within the top ten, if so, enter initials for the list
+bool EnterHiScore();						//- check if the score is within the top ten, if so, enter initials for the list
 void Flash(int red, int grn, int blu);		//- flash the screen with the given color
 void Squirt(int x, int y, int amount, float xdir, int col);
 bool FadeScreenToBlack();					//- fade the screen to black, returns true if any input was taken
@@ -1000,7 +1001,9 @@ void LD3Main()
 			//while(GetTickCount() - FrameStartTime < 100);
 			
 	}
-	EnterHiScore();
+        if(EnterHiScore()) {
+            mnuScores();
+        }
 	}
 	Shutdown();
 }
@@ -2306,8 +2309,12 @@ void ReadWord(ifstream *File, char *Word)
 	char ch = 0;
 	int  count = 0;
 		
-	//memset(Word, 0, 20);
 	File->get(ch);
+    if(ch == 0){
+        while(ch <= 42 || ch >= 123 || ch == 46) File->get(ch);
+        Word[0] = '\0';
+        return;
+    }
 	while(ch <= 42 || ch >= 123 || ch == 46) File->get(ch);
 	while(ch == 59){
 		while(ch != '\n') File->get(ch);
@@ -12054,6 +12061,20 @@ void mnuTitle()
 	}
 }
 
+void generateDefaultScores(char* initials, char* scores) {
+    
+    char alphabet[] = "XOR,ICY,WIZ,JOY,DAV,ALX,JOE,FLT,MRK,EOF";
+    long _score;
+    
+    for(int i = 0; i < 10; i++) {
+        _score = ((9-i)+1)*((9-i)+1)*1000;
+        ltoa(_score, &scores[i*20], 10);
+        for(int j = 0; j < 3; j++) {
+            initials[i*4+j] = alphabet[i*4+j];
+        }
+    }
+}
+
 void mnuScores()
 {
 	//- Show the hiscores
@@ -12062,7 +12083,7 @@ void mnuScores()
 	float ArrowAni = 0;
 	bool PlaySound = false;
 	int  yScroll = 240;
-	int Col[15]; int px[15];
+	int Col[10]; int px[10];
 	bool SlideIn = true;
 	bool SlideOut = false;
 	bool SlideChange = false;
@@ -12070,35 +12091,23 @@ void mnuScores()
 
 	char Initial[40];
 	char HiScore[200];
-	//int  score;
+	long _score;
 
-	Col[0] = 15;
-	px[0] = 340;
-	for(int i = 1; i <= 10; i++){
+	for(int i = 0; i < 10; i++){
 		Col[i] = 15;
-		px[i] = 340+i*4;
+		px[i]  = 340+i*4;
 	}
 
 	ifstream ScoreFile;
 
 	//- Load in the scorefile
-	ScoreFile.open("save/hiscores.txt", ios::binary);
+	ScoreFile.open("save/hiscores.dat", ios::binary);
     if(ScoreFile.is_open()) {
-		//- get the initials
-		memset(Initial, 0, 40);
-		for(int i = 1; i <= 10; i++)			
-			ReadWord(&ScoreFile, &Initial[i*4]);
-		//- get the scores
-		memset(HiScore, 0, 200);
-		for(int i = 1; i <= 10; i++){
-			ReadWord(&ScoreFile, &HiScore[i*20]);
-		}
+		ScoreFile.read(Initial, sizeof(Initial));
+        ScoreFile.read(HiScore, sizeof(HiScore));
         ScoreFile.close();
     } else {
-        for(int i = 1; i <= 10; i++){
-			strcpy(&Initial[i*4], "---");
-            strcpy(&HiScore[i*20], "------");
-		}
+        generateDefaultScores(Initial, HiScore);
     }
 
 	while(NO_ONE_CARES)
@@ -12113,27 +12122,20 @@ void mnuScores()
 		LD3.DrawSky(&WinApp, xShift, 0);
 		LD3.DrawMap(&WinApp, 0, 0, 0, 1);
 
-		//WriteBigFont(50, 5+yScroll, "Hi Scores");
-		
-		/*for(int i = 0; i <= 9; i++){
-			WriteBigFont(60,  i*20+30+yScroll, &Initial[i*4]);
-			WriteBigFont(180, i*20+30+yScroll, &HiScore[i*20]);
-		}		
-		WriteBigFont(120, 240, "Back");
-		LD3.PutSprite(&WinApp, 100, Arrow, -1, 59+(int)ArrowAni, false);
-
-		yScroll--;
-		if(yScroll < 0) yScroll = 0;*/
-
-		WriteText(px[0]+20, 50, "Hi Scores", 15, 0);
-		for(int i = 1; i <= 10; i++){
-			WriteText(px[i], 64+i*10, &Initial[i<<2], Col[i], 0);
-			WriteText(px[i]+64, 64+i*10, &HiScore[i*20], 14, 0);			
+		char scoreLine[20];
+        WriteText(px[0]+20, 64, "Top Ten Scores", 15, 0);
+		for(int i = 0; i < 10; i++) {
+            if(Initial[i*4] == '\0') {
+                strcpy(&Initial[i*4 ], "---"       );
+                strcpy(&HiScore[i*20], "----------");
+            }
+            sprintf(scoreLine, "%2d %3s %10d", i+1, &Initial[i*4 ], atol(&HiScore[i*20]));
+            WriteText(px[i], 80+i*10, scoreLine, Col[i], 0);
 		}	
 
 		SlideChange = false;
 		if(SlideIn){
-			for(int i = 0; i <= 10; i++){
+			for(int i = 0; i < 10; i++){
 				if(px[i] > 100){
 					px[i] -= (14-i)<<1;
 					SlideChange = true;
@@ -12142,7 +12144,7 @@ void mnuScores()
 			}
 		}
 		else if(SlideOut){
-			for(int i = 0; i <= 10; i++){
+			for(int i = 0; i < 10; i++){
 				if(px[i] < 360){
 					px[i] += (i+4)<<1;
 					SlideChange = true;
@@ -12200,12 +12202,12 @@ void mnuScores()
 	}
 }
 
-void EnterHiScore()
+bool EnterHiScore()
 {
-	char Initial[100];
+	char Initial[40];
 	char PlayerInitial[4];
 	char cHiScore[200];
-	int  HiScore[11];
+	long HiScore[10];
 	int  PlayerRank = -1;
 	int  InitialCount = 0;
 	char *Letter = &PlayerInitial[InitialCount];
@@ -12213,11 +12215,12 @@ void EnterHiScore()
 	int  BlinkTimer = 0;
 	bool PlaySound = false;
 	char SingleInitial[3];
-	HiScore[10] = 0;
-	//int  score;
+	
+    memset(Initial, 0, sizeof(Initial));
+    memset(cHiScore, 0, sizeof(cHiScore));
+    memset(HiScore, 0, sizeof(HiScore));
 	memcpy(PlayerInitial, "AAA", 3);
 	memcpy(SingleInitial, "A ", 3);
-	memset(cHiScore, 0, 200);
 
 	LD3.LoadTileSet(&WinApp, "gfx/ld3font.put", 0);
 	LD3.LoadMap("maps/blank.ld3");
@@ -12226,23 +12229,18 @@ void EnterHiScore()
 	ofstream ScoreFile2;
 
 	//- Load in the scorefile
-	ScoreFile.open("save/hiscores.txt", ios::binary);
+	ScoreFile.open("save/hiscores.dat", ios::binary);
     if(ScoreFile.is_open()) {
-		//- get the initials
-		memset(Initial, 0, 100);
-		for(int i = 0; i <= 9; i++)			
-			ReadWord(&ScoreFile, &Initial[i*10]);
-		//- get the scores		
-		for(int i = 0; i <= 9; i++)
-			HiScore[i] = ReadValue(&ScoreFile);
+		ScoreFile.read(Initial, sizeof(Initial));
+        ScoreFile.read(cHiScore, sizeof(cHiScore));
         ScoreFile.close();
     } else {
-        // TODO log debug
+        generateDefaultScores(Initial, cHiScore);
     }
+    for(int i = 0; i < 10; i++) HiScore[i] = atol(&cHiScore[i*20]);
 
 	//- Check if the player's score is within the hiscores
-
-	for(int i = 0; i <= 9; i++){
+	for(int i = 0; i < 10; i++){
 		if(Score > HiScore[i] && i == 0) PlayerRank = 0;
 		if(Score < HiScore[i] && Score > HiScore[i+1] && i < 9) PlayerRank = i+1;
 		if(Score == HiScore[i] && Score > HiScore[i+1] && i < 9) PlayerRank = i+1;
@@ -12258,11 +12256,10 @@ void EnterHiScore()
 				break;
 			WindowProc(&msg);
 		}
-
 		
 		LD3.ClearBuffer(&WinApp, 0);
 			
-		WriteBigFont(70,  15, "New Hi Score");
+		WriteBigFont(60, 15, "New High Score");
 		WriteBigFont(60, 80, "Enter Initials");
 
 		SingleInitial[0] = PlayerInitial[0];
@@ -12328,37 +12325,31 @@ void EnterHiScore()
 	}
 
 	if(PlayerRank > -1){
-
-		//- Insert the player's score within the rankings
+        
+        //- Insert the player's score within the rankings
 		for(int i = 8; i >= PlayerRank; i--){
-			memcpy(&Initial[(i+1)*10], &Initial[i*10], 4);
+			memcpy(&Initial[(i+1)*4], &Initial[i*4], 4);
+            memcpy(&cHiScore[(i+1)*20], &cHiScore[i*20], 20);
 			HiScore[i+1] = HiScore[i];
-		}		
-		//memset(PlayerInitial, 0, 4);
-		memcpy(&Initial[PlayerRank*10], PlayerInitial, 4);
+		}
+        memcpy(&Initial[PlayerRank*4], PlayerInitial, 4);
+        ltoa(Score, &cHiScore[PlayerRank*20], 10);
 		HiScore[PlayerRank] = Score;
 		
-		//- save the score data
-		ScoreFile2.open("save/hiscores.txt", ios::binary);
+        //- save the score data
+		ScoreFile2.open("save/hiscores.dat", ios::binary);
         if(ScoreFile2.is_open()) {
-			//- write the initials
-			//memset(Initial, 0, 40);
-			for(int i = 0; i <= 9; i++)				
-				PutString(&ScoreFile2, &Initial[i*10]);
-			//- write the scores		
-			for(int i = 0; i <= 9; i++){
-				sprintf(&cHiScore[i*20], "%d", HiScore[i]);
-				PutString(&ScoreFile2, &cHiScore[i*20]);
-			}
+			ScoreFile2.write(Initial, sizeof(Initial));
+            ScoreFile2.write(cHiScore, sizeof(cHiScore));
             ScoreFile2.close();
         } else {
             char errmsg[] = "Unable to open scores file: ";
-            SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, "save/hiscores.txt"), WinApp.hwnd);
+            SDL_ShowSimpleMessageBox(0, "Error", strcat(errmsg, "save/hiscores.dat"), WinApp.hwnd);
         }
 		Score = 0;
-		mnuScores();
+		return true;
 	}
-
+    return false;
 }
 
 void mnuOptions()
@@ -13756,11 +13747,11 @@ void PutString(ofstream *File, char *Text)
 	int Length;
 
 	Length = strlen(Text);
-	Text[Length+1] = 13;
-	Text[Length+2] = 10;
-	for(int i = 0; i <= Length+2; i++){
+	for(int i = 0; i < Length; i++){
 		File->put(Text[i]);
 	}
+    File->put(13);
+    File->put(10);
 }
 
 void WriteBigFont(int x, int y, const char *text)
