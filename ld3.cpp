@@ -1003,6 +1003,7 @@ void LD3ENGINE::WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center,
 	int				lp;
 	int				vn, ovn;
 	int				tx, ty, spchar, length;
+    int             w;
 	UCHAR			col;
 
 	
@@ -1025,8 +1026,14 @@ void LD3ENGINE::WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center,
 			{
 				vn = ovn;
 				spchar = Text[i]-32;
-				for(int cy = 0; cy <= 4; cy++){
-					for(int cx = 0; cx <= 5; cx++){
+                w = 6;
+                if((tx+w) >= xRes)
+                {
+                    w = xRes-tx;
+                    if(w > 6) break;
+                }
+				for(int cy = 0; cy <= 5; cy++){
+					for(int cx = 0; cx < w; cx++){
 						col = Font[cx][cy][spchar];
 						if(col) VideoBuffer[tx+cx+vn] = col;
 					}
@@ -1061,6 +1068,7 @@ void LD3ENGINE::WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center,
 	int				lp;
 	int				vn, ovn;
 	int				tx, ty, spchar, length;
+    int             w;
 	UCHAR			col;
 
 	
@@ -1082,8 +1090,14 @@ void LD3ENGINE::WriteText(WINAPP *WinApp, int x, int y, char* Text, bool center,
 			{
 				vn = ovn;
 				spchar = Text[i]-32;
-				for(int cy = 0; cy <= 4; cy++){
-					for(int cx = 0; cx <= 5; cx++){
+                w = 6;
+                if((tx+w) >= xRes)
+                {
+                    w = xRes-tx;
+                    if(w > 6) break;
+                }
+				for(int cy = 0; cy < 5; cy++){
+					for(int cx = 0; cx < w; cx++){
 						col = Font[cx][cy][spchar];
 						if(col) VideoBuffer[tx+cx+vn] = fcol;
 					}

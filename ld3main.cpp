@@ -13477,6 +13477,7 @@ bool mnuChooseSlot(bool Loading)
                 if(SaveData[i].Level == 6) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/crossways.bmp", 39, top-3);
 				if(SaveData[i].Level == 7) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/frostbite.bmp", 39, top-3);
                 if(SaveData[i].Level == 8) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/otherworld.bmp", 39, top-3);
+                if(SaveData[i].Level == 9) LD3.LoadMapIcon(&WinApp, "gfx/mapicons/homebase.bmp", 39, top-3);
 
 				if(SaveData[i].Level == 0) WriteText(220, top, "Home Base", 15, 0);
                 if(SaveData[i].Level == 1) WriteText(220, top, "Ventilation", 15, 0);
@@ -13487,7 +13488,7 @@ bool mnuChooseSlot(bool Loading)
 				if(SaveData[i].Level == 6) { WriteText(220, top, "Aqueduct", 15, 0); WriteText(220, top+10, "Crossways", 15, 0); }
 				if(SaveData[i].Level == 7) WriteText(220, top, "Frostbite", 15, 0);
 				if(SaveData[i].Level == 8) { WriteText(220, top, "The Other", 15, 0); WriteText(220, top+10, "World", 15, 0); }
-				if(SaveData[i].Level == 9) WriteText(220, top, "The End", 15, 0);
+				if(SaveData[i].Level == 9) { WriteText(220, top, "Back On", 15, 0); WriteText(220, top+10, "Earth", 15, 0); }
 				/*if(SaveData[i].Shotgun)
 					LD3.PutSprite(&WinApp, 240, top+2, ICON_SPRITE_SET, iconShotgun, false);
 				else
